@@ -2,6 +2,7 @@ import asyncio
 import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from app.models import Base, User, Ward, Municipality, Truck, UserRole, TruckState
 from app.auth import get_password_hash
 from app.config import settings
@@ -16,6 +17,12 @@ async def seed_database():
         await conn.run_sync(Base.metadata.create_all)
     
     async with async_session() as session:
+        # Check if data already exists by checking any table
+        result = await session.execute(select(Municipality).limit(1))
+        if result.scalar_one_or_none():
+            print("Database already seeded. Skipping...")
+            return
+        
         # Create municipality
         municipality = Municipality(name="Default Municipality")
         session.add(municipality)
