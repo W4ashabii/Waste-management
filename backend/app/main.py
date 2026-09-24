@@ -457,8 +457,14 @@ async def websocket_alerts(websocket: WebSocket, token: Optional[str] = None):
         manager.disconnect(websocket)
 
 
-@app.get("/api/v1/health")
+@app.get("/health")
 async def health():
+    """Healthcheck endpoint (root-level, used by probes/healthchecks)."""
+    return {"status": "healthy"}
+
+
+@app.get("/api/v1/health")
+async def health_v1():
     return {"status": "healthy"}
 
 
