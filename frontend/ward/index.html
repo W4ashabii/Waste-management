@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waste Management - Ward Admin</title>
+</head>
+<body>
+    <h1>Ward Admin Interface</h1>
+    
+    <div>
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="ward@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="ward123">
+        <button onclick="login()">Login</button>
+        <pre id="loginResult">Not logged in</pre>
+    </div>
+    
+    <div id="alertsSection" style="margin-top: 20px;">
+        <h3>Alerts for Your Ward</h3>
+        <button onclick="fetchAlerts()">Refresh Alerts</button>
+        <pre id="alertsContent">No alerts yet</pre>
+    </div>
+    
+    <div id="trucksSection" style="margin-top: 20px;">
+        <h3>Trucks in Your Ward</h3>
+        <button onclick="fetchTrucks()">Refresh Trucks</button>
+        <pre id="trucksContent">No trucks yet</pre>
+    </div>
+    
+    <div id="dispatchSection" style="margin-top: 20px;">
+        <h3>Dispatch Truck</h3>
+        <input type="number" id="truckId" placeholder="Truck ID">
+        <input type="number" id="wardId" placeholder="Ward ID">
+        <input type="number" id="alertId" placeholder="Alert ID">
+        <button onclick="dispatchTruck()">Dispatch Truck</button>
+        <pre id="dispatchResult">No dispatch yet</pre>
+    </div>
+    
+    <div id="updateStateSection" style="margin-top: 20px;">
+        <h3>Update Truck State</h3>
+        <input type="number" id="updateTruckId" placeholder="Truck ID">
+        <select id="newState">
+            <option value="idle">Idle</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="enroute">Enroute</option>
+            <option value="collecting">Collecting</option>
+            <option value="completed">Completed</option>
+        </select>
+        <button onclick="updateTruckState()">Update State</button>
+        <pre id="updateStateResult">No state update yet</pre>
+    </div>
+    
+    <div id="liveAlerts" style="margin-top: 20px;">
+        <h3>Live WebSocket Alerts</h3>
+        <pre id="wsAlertsContent">No live alerts yet</pre>
+    </div>
+
+    <script>
+        let authToken = '';
+        const API_BASE = 'http://localhost:8000/api/v1';
+        const WS_BASE = 'ws://localhost:8000/ws/alerts';
+        let ws = null;
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const formData = new FormData();
+            formData.append('username', email);
+            formData.append('password', password);
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                authToken = data.access_token;
+                document.getElementById('loginResult').textContent = JSON.stringify(data, null, 2);
+                connectWebSocket();
+                fetchAlerts();
+                fetchTrucks();
+            } catch (error) {
+                document.getElementById('loginResult').textContent = 'Login failed: ' + error;
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const headers = { 'Authorization': `Bearer ${authToken}` };
+                const response = await fetch(`${API_BASE}/alerts`, { headers });
+                const data = await response.json();
+                document.getElementById('alertsContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('alertsContent').textContent = 'Failed to fetch alerts: ' + error;
+            }
+        }
+
+        async function fetchTrucks() {
+            try {
+                const headers = { 'Authorization': `Bearer ${authToken}` };
+                const response = await fetch(`${API_BASE}/trucks`, { headers });
+                const data = await response.json();
+                document.getElementById('trucksContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('trucksContent').textContent = 'Failed to fetch trucks: ' + error;
+            }
+        }
+
+        async function dispatchTruck() {
+            const truckId = document.getElementById('truckId').value;
+            const wardId = document.getElementById('wardId').value;
+            const alertId = document.getElementById('alertId').value;
+            
+            try {
+                const headers = { 
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                };
+                const response = await fetch(`${API_BASE}/trucks/${truckId}/dispatch`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ ward_id: parseInt(wardId), alert_id: parseInt(alertId) })
+                });
+                const data = await response.json();
+                document.getElementById('dispatchResult').textContent = JSON.stringify(data, null, 2);
+                fetchTrucks();
+            } catch (error) {
+                document.getElementById('dispatchResult').textContent = 'Dispatch failed: ' + error;
+            }
+        }
+
+        async function updateTruckState() {
+            const truckId = document.getElementById('updateTruckId').value;
+            const newState = document.getElementById('newState').value;
+            
+            try {
+                const headers = { 
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                };
+                const response = await fetch(`${API_BASE}/trucks/${truckId}/update_state`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ state: newState })
+                });
+                const data = await response.json();
+                document.getElementById('updateStateResult').textContent = JSON.stringify(data, null, 2);
+                fetchTrucks();
+            } catch (error) {
+                document.getElementById('updateStateResult').textContent = 'State update failed: ' + error;
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            const wsUrl = authToken ? `${WS_BASE}?token=${authToken}` : WS_BASE;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                document.getElementById('wsAlertsContent').textContent = JSON.stringify(data, null, 2);
+                // Auto-refresh alerts and trucks when we get updates
+                if (data.type === 'alert' || data.type === 'truck_update') {
+                    fetchAlerts();
+                    fetchTrucks();
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        // Initialize WebSocket connection
+        connectWebSocket();
+    </script>
+</body>
+</html>

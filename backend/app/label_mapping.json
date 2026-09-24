@@ -1,0 +1,12 @@
+{
+  "plastic_bottle": "non_degradable",
+  "plastic_bag": "non_degradable",
+  "metal_can": "non_degradable",
+  "glass_bottle": "non_degradable",
+  "food_waste": "degradable",
+  "paper": "degradable",
+  "cardboard": "degradable",
+  "organic_waste": "degradable",
+  "styrofoam": "non_degradable",
+  "battery": "non_degradable"
+}

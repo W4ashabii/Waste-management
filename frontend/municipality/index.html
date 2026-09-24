@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waste Management - Municipality Admin</title>
+</head>
+<body>
+    <h1>Municipality Admin Dashboard</h1>
+    
+    <div>
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="municipality@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="muni123">
+        <button onclick="login()">Login</button>
+        <pre id="loginResult">Not logged in</pre>
+    </div>
+    
+    <div id="wardsSection" style="margin-top: 20px;">
+        <h3>All Wards</h3>
+        <button onclick="fetchWards()">Refresh Wards</button>
+        <pre id="wardsContent">No wards data yet</pre>
+    </div>
+    
+    <div id="trucksSection" style="margin-top: 20px;">
+        <h3>All Trucks</h3>
+        <button onclick="fetchTrucks()">Refresh Trucks</button>
+        <pre id="trucksContent">No trucks yet</pre>
+    </div>
+    
+    <div id="alertsSection" style="margin-top: 20px;">
+        <h3>All Alerts</h3>
+        <button onclick="fetchAlerts()">Refresh Alerts</button>
+        <pre id="alertsContent">No alerts yet</pre>
+    </div>
+    
+    <div id="analyticsSection" style="margin-top: 20px;">
+        <h3>Ward Analytics</h3>
+        <input type="number" id="analyticsWardId" placeholder="Ward ID" value="1">
+        <button onclick="fetchAnalytics()">Get Analytics</button>
+        <pre id="analyticsContent">No analytics yet</pre>
+    </div>
+    
+    <div id="reassignSection" style="margin-top: 20px;">
+        <h3>Reassign Truck</h3>
+        <input type="number" id="reassignTruckId" placeholder="Truck ID">
+        <input type="number" id="reassignWardId" placeholder="New Ward ID">
+        <input type="number" id="reassignAlertId" placeholder="Alert ID">
+        <button onclick="reassignTruck()">Reassign Truck</button>
+        <pre id="reassignResult">No reassignment yet</pre>
+    </div>
+    
+    <div id="liveAlerts" style="margin-top: 20px;">
+        <h3>Live WebSocket Updates</h3>
+        <pre id="wsAlertsContent">No live updates yet</pre>
+    </div>
+
+    <script>
+        let authToken = '';
+        const API_BASE = 'http://localhost:8000/api/v1';
+        const WS_BASE = 'ws://localhost:8000/ws/alerts';
+        let ws = null;
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const formData = new FormData();
+            formData.append('username', email);
+            formData.append('password', password);
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                authToken = data.access_token;
+                document.getElementById('loginResult').textContent = JSON.stringify(data, null, 2);
+                connectWebSocket();
+                fetchTrucks();
+                fetchAlerts();
+            } catch (error) {
+                document.getElementById('loginResult').textContent = 'Login failed: ' + error;
+            }
+        }
+
+        async function fetchWards() {
+            // This would need a wards endpoint - for now just show a message
+            document.getElementById('wardsContent').textContent = 'Wards endpoint not implemented in MVP';
+        }
+
+        async function fetchTrucks() {
+            try {
+                const headers = { 'Authorization': `Bearer ${authToken}` };
+                const response = await fetch(`${API_BASE}/trucks`, { headers });
+                const data = await response.json();
+                document.getElementById('trucksContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('trucksContent').textContent = 'Failed to fetch trucks: ' + error;
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const headers = { 'Authorization': `Bearer ${authToken}` };
+                const response = await fetch(`${API_BASE}/alerts`, { headers });
+                const data = await response.json();
+                document.getElementById('alertsContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('alertsContent').textContent = 'Failed to fetch alerts: ' + error;
+            }
+        }
+
+        async function fetchAnalytics() {
+            const wardId = document.getElementById('analyticsWardId').value;
+            try {
+                const headers = { 'Authorization': `Bearer ${authToken}` };
+                const response = await fetch(`${API_BASE}/analytics/ward/${wardId}`, { headers });
+                const data = await response.json();
+                document.getElementById('analyticsContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('analyticsContent').textContent = 'Failed to fetch analytics: ' + error;
+            }
+        }
+
+        async function reassignTruck() {
+            const truckId = document.getElementById('reassignTruckId').value;
+            const wardId = document.getElementById('reassignWardId').value;
+            const alertId = document.getElementById('reassignAlertId').value;
+            
+            try {
+                const headers = { 
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                };
+                const response = await fetch(`${API_BASE}/trucks/${truckId}/dispatch`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ ward_id: parseInt(wardId), alert_id: parseInt(alertId) })
+                });
+                const data = await response.json();
+                document.getElementById('reassignResult').textContent = JSON.stringify(data, null, 2);
+                fetchTrucks();
+            } catch (error) {
+                document.getElementById('reassignResult').textContent = 'Reassignment failed: ' + error;
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            const wsUrl = authToken ? `${WS_BASE}?token=${authToken}` : WS_BASE;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                document.getElementById('wsAlertsContent').textContent = JSON.stringify(data, null, 2);
+                // Auto-refresh data when we get updates
+                if (data.type === 'alert' || data.type === 'truck_update') {
+                    fetchTrucks();
+                    fetchAlerts();
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        // Initialize WebSocket connection
+        connectWebSocket();
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waste Detection - User</title>
+</head>
+<body>
+    <h1>Waste Detection User Interface</h1>
+    
+    <div>
+        <h2>Submit Image for Detection</h2>
+        <input type="file" id="imageInput" accept="image/*">
+        <input type="text" id="cameraId" placeholder="Camera ID (optional)">
+        <button onclick="submitImage()">Detect</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px;">
+        <h3>Detection Result</h3>
+        <pre id="resultContent">No detection yet</pre>
+    </div>
+    
+    <div id="alerts" style="margin-top: 20px;">
+        <h3>Live Alerts</h3>
+        <pre id="alertsContent">No alerts yet</pre>
+    </div>
+    
+    <div id="truckInfo" style="margin-top: 20px;">
+        <h3>Truck Information</h3>
+        <pre id="truckContent">No truck info yet</pre>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="user@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="user123">
+        <button onclick="login()">Login</button>
+        <pre id="loginResult">Not logged in</pre>
+    </div>
+
+    <script>
+        let authToken = '';
+        const API_BASE = 'http://localhost:8000/api/v1';
+        const WS_BASE = 'ws://localhost:8000/ws/alerts';
+        let ws = null;
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const formData = new FormData();
+            formData.append('username', email);
+            formData.append('password', password);
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                authToken = data.access_token;
+                document.getElementById('loginResult').textContent = JSON.stringify(data, null, 2);
+                connectWebSocket();
+            } catch (error) {
+                document.getElementById('loginResult').textContent = 'Login failed: ' + error;
+            }
+        }
+
+        async function submitImage() {
+            const imageInput = document.getElementById('imageInput');
+            const cameraId = document.getElementById('cameraId').value;
+            
+            if (!imageInput.files[0]) {
+                alert('Please select an image');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+            if (cameraId) {
+                formData.append('camera_id', cameraId);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/detect`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('resultContent').textContent = JSON.stringify(data, null, 2);
+                
+                // Fetch truck info after detection
+                fetchTruckInfo();
+            } catch (error) {
+                document.getElementById('resultContent').textContent = 'Detection failed: ' + error;
+            }
+        }
+
+        async function fetchTruckInfo() {
+            try {
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                
+                const response = await fetch(`${API_BASE}/trucks`, {
+                    headers: headers
+                });
+                const data = await response.json();
+                document.getElementById('truckContent').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('truckContent').textContent = 'Failed to fetch truck info: ' + error;
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            const wsUrl = authToken ? `${WS_BASE}?token=${authToken}` : WS_BASE;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                document.getElementById('alertsContent').textContent = JSON.stringify(data, null, 2);
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        // Initialize WebSocket connection
+        connectWebSocket();
+    </script>
+</body>
+</html>
