@@ -107,7 +107,7 @@ def test_password_hashing():
 @pytest.mark.asyncio
 async def test_detection_creates_alert():
     """Test that detection creates alert when confidence is high."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Submit detection
         response = await client.post("/api/v1/detect", files=files)
         # Verify alert was created
@@ -164,7 +164,7 @@ async def test_descriptive_name():
 ```python
 @pytest.mark.asyncio
 async def test_api_endpoint():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/endpoint")
         assert response.status_code == 200
         data = response.json()
@@ -175,7 +175,7 @@ async def test_api_endpoint():
 ```python
 @pytest.mark.asyncio
 async def test_protected_endpoint():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Without token
         response = await client.get("/api/v1/protected")
         assert response.status_code == 401
@@ -264,7 +264,7 @@ async def test_detection_with_mocked_model():
 ```python
 @pytest.mark.asyncio
 async def test_websocket_connection():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         async with client.websocket_connect("/ws/alerts") as websocket:
             await websocket.send_json({"type": "ping"})
             response = await websocket.receive_json()
@@ -275,7 +275,7 @@ async def test_websocket_connection():
 ```python
 @pytest.mark.asyncio
 async def test_websocket_alert_broadcast():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         async with client.websocket_connect("/ws/alerts") as websocket:
             # Trigger alert creation
             await client.post("/api/v1/detect", files=files)

@@ -3,14 +3,14 @@ Alert system tests for the waste management system.
 Tests alert creation, retrieval, and WebSocket notifications.
 """
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
 @pytest.mark.asyncio
 async def test_get_alerts_as_user():
     """Test getting alerts as regular user."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as user
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -30,7 +30,7 @@ async def test_get_alerts_as_user():
 @pytest.mark.asyncio
 async def test_get_alerts_as_ward_admin():
     """Test getting alerts as ward admin."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -50,7 +50,7 @@ async def test_get_alerts_as_ward_admin():
 @pytest.mark.asyncio
 async def test_get_alerts_by_ward_id():
     """Test getting alerts filtered by ward ID."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as municipality admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -70,15 +70,15 @@ async def test_get_alerts_by_ward_id():
 @pytest.mark.asyncio
 async def test_alerts_unauthorized():
     """Test accessing alerts without authentication."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/alerts")
         assert response.status_code == 401
 
 
 @pytest.mark.asyncio
-async def test_high_confidence_detection_creates_alert():
+async def test_high_confidence_detection_creates_alert(mock_model_service):
     """Test that high-confidence detection automatically creates alert."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as user
         login_response = await client.post(
             "/api/v1/auth/login",

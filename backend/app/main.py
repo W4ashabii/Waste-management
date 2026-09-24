@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List, Optional
 from datetime import datetime, timedelta
+from pathlib import Path
 import json
 import httpx
 from app.database import get_db, init_db
@@ -173,8 +174,9 @@ async def detect(
         )
         model_result = response.json()
     
-    # Load label mapping
-    with open("app/label_mapping.json", "r") as f:
+    # Load label mapping (path relative to this module, not the CWD)
+    label_mapping_path = Path(__file__).parent / "label_mapping.json"
+    with open(label_mapping_path, "r") as f:
         label_mapping = json.load(f)
     
     # Map model labels to degradable/non_degradable

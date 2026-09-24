@@ -4,14 +4,14 @@ Tests image upload, detection, and alert creation.
 """
 import pytest
 import io
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_detection_endpoint():
+async def test_detection_endpoint(mock_model_service):
     """Test waste detection with image upload."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Create a minimal test image
         image_content = b"fake image content"
         image_file = io.BytesIO(image_content)
@@ -31,9 +31,9 @@ async def test_detection_endpoint():
 
 
 @pytest.mark.asyncio
-async def test_detection_without_camera_id():
+async def test_detection_without_camera_id(mock_model_service):
     """Test detection without providing camera ID."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         image_content = b"fake image content"
         image_file = io.BytesIO(image_content)
         image_file.name = "test.jpg"
@@ -47,9 +47,9 @@ async def test_detection_without_camera_id():
 
 
 @pytest.mark.asyncio
-async def test_detection_creates_alert():
+async def test_detection_creates_alert(mock_model_service):
     """Test that high-confidence detection creates an alert."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # First login to get token
         login_response = await client.post(
             "/api/v1/auth/login",

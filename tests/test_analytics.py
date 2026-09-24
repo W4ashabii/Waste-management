@@ -3,14 +3,14 @@ Analytics endpoint tests for the waste management system.
 Tests ward-level analytics and data aggregation.
 """
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
 @pytest.mark.asyncio
 async def test_get_analytics_as_municipality_admin():
     """Test getting analytics as municipality admin."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as municipality admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -30,7 +30,7 @@ async def test_get_analytics_as_municipality_admin():
 @pytest.mark.asyncio
 async def test_get_analytics_as_ward_admin():
     """Test getting analytics as ward admin for own ward."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -50,7 +50,7 @@ async def test_get_analytics_as_ward_admin():
 @pytest.mark.asyncio
 async def test_get_analytics_unauthorized_ward():
     """Test that ward admin cannot access other ward's analytics."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin (ward 1)
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -69,7 +69,7 @@ async def test_get_analytics_unauthorized_ward():
 @pytest.mark.asyncio
 async def test_get_analytics_unauthorized_user():
     """Test that regular user cannot access analytics."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as regular user
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -87,7 +87,7 @@ async def test_get_analytics_unauthorized_user():
 @pytest.mark.asyncio
 async def test_analytics_with_date_range():
     """Test analytics with date range parameter."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as municipality admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -107,7 +107,7 @@ async def test_analytics_with_date_range():
 @pytest.mark.asyncio
 async def test_analytics_response_structure():
     """Test that analytics response has correct structure."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as municipality admin
         login_response = await client.post(
             "/api/v1/auth/login",

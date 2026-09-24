@@ -4,9 +4,18 @@ Pytest configuration and fixtures for the waste management system.
 import pytest
 import asyncio
 import os
+import sys
+from pathlib import Path
+
+# Add backend directory to Python path
+backend_dir = Path(__file__).parent.parent / "backend"
+sys.path.insert(0, str(backend_dir))
+
+import httpx
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from httpx import AsyncClient
+from sqlalchemy import select
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.database import get_db
 from app.models import Base
@@ -28,11 +37,69 @@ async def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture(scope="module")
+async def seed_test_data():
+    """Seed municipality, wards, users, and trucks for tests."""
+    async with async_session() as session:
+        municipality = Municipality(name="Default Municipality")
+        session.add(municipality)
+        await session.commit()
+        await session.refresh(municipality)
+
+        ward1 = Ward(name="Ward 1", municipality_id=municipality.id)
+        ward2 = Ward(name="Ward 2", municipality_id=municipality.id)
+        ward3 = Ward(name="Ward 3", municipality_id=municipality.id)
+        session.add_all([ward1, ward2, ward3])
+        await session.commit()
+        await session.refresh(ward1)
+        await session.refresh(ward2)
+        await session.refresh(ward3)
+
+        user1 = User(
+            name="Regular User",
+            email="user@example.com",
+            password_hash=get_password_hash("user123"),
+            role=UserRole.USER,
+            ward_id=ward1.id
+        )
+        ward_admin = User(
+            name="Ward Admin",
+            email="ward@example.com",
+            password_hash=get_password_hash("ward123"),
+            role=UserRole.WARD_ADMIN,
+            ward_id=ward1.id
+        )
+        municipality_admin = User(
+            name="Municipality Admin",
+            email="municipality@example.com",
+            password_hash=get_password_hash("muni123"),
+            role=UserRole.MUNICIPALITY_ADMIN
+        )
+        session.add_all([user1, ward_admin, municipality_admin])
+        await session.commit()
+
+        truck1 = Truck(
+            plate_no="TRUCK-001",
+            ward_id_assigned=ward1.id,
+            state=TruckState.IDLE,
+            capacity=100
+        )
+        truck2 = Truck(
+            plate_no="TRUCK-002",
+            ward_id_assigned=ward2.id,
+            state=TruckState.IDLE,
+            capacity=150
+        )
+        session.add_all([truck1, truck2])
+        await session.commit()
+
+
+@pytest.fixture(scope="session", autouse=True)
 async def setup_database():
-    """Setup test database."""
+    """Create tables and seed data once per test session."""
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+    await seed_test_data()
     yield
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -49,8 +116,39 @@ async def db_session(setup_database):
 @pytest.fixture
 async def test_client():
     """Provide test client for API tests."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
+
+
+@pytest.fixture
+def mock_model_service(monkeypatch):
+    """Mock the model-service HTTP call used by the /detect endpoint.
+
+    Only intercepts requests to the model service URL so the ASGI test
+    client keeps working normally. Returns a fixed prediction.
+    """
+    from app.config import settings
+    original_post = httpx.AsyncClient.post
+
+    class FakeResponse:
+        def json(self):
+            return {
+                "predictions": [
+                    {
+                        "label": "plastic_bottle",
+                        "confidence": 0.9,
+                        "bbox": [10, 20, 100, 200],
+                    }
+                ]
+            }
+
+    async def fake_post(self, url, **kwargs):
+        if url.startswith(f"{settings.MODEL_SERVICE_URL}/detect"):
+            return FakeResponse()
+        return await original_post(self, url, **kwargs)
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+    return fake_post
 
 
 @pytest.fixture

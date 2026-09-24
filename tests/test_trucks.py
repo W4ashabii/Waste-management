@@ -3,14 +3,14 @@ Truck management tests for the waste management system.
 Tests truck listing, dispatching, and state transitions.
 """
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
 @pytest.mark.asyncio
 async def test_get_trucks_as_user():
     """Test getting trucks as regular user."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as user
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -30,7 +30,7 @@ async def test_get_trucks_as_user():
 @pytest.mark.asyncio
 async def test_get_trucks_as_ward_admin():
     """Test getting trucks as ward admin."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -50,7 +50,7 @@ async def test_get_trucks_as_ward_admin():
 @pytest.mark.asyncio
 async def test_get_trucks_as_municipality_admin():
     """Test getting trucks as municipality admin."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as municipality admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -68,9 +68,9 @@ async def test_get_trucks_as_municipality_admin():
 
 
 @pytest.mark.asyncio
-async def test_dispatch_truck_as_ward_admin():
+async def test_dispatch_truck_as_ward_admin(mock_model_service):
     """Test dispatching truck as ward admin."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -113,7 +113,7 @@ async def test_dispatch_truck_as_ward_admin():
 @pytest.mark.asyncio
 async def test_update_truck_state():
     """Test updating truck state."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as ward admin
         login_response = await client.post(
             "/api/v1/auth/login",
@@ -133,7 +133,7 @@ async def test_update_truck_state():
 @pytest.mark.asyncio
 async def test_dispatch_truck_unauthorized():
     """Test that regular user cannot dispatch trucks."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Login as regular user
         login_response = await client.post(
             "/api/v1/auth/login",

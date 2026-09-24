@@ -63,7 +63,8 @@ Tests are organized by feature and functionality:
 
 Available fixtures in `conftest.py`:
 
-- `setup_database` - Database setup and teardown
+- `setup_database` - Session-scoped database setup with seed data (autouse)
+- `mock_model_service` - Mocks the external model-service API for detection tests
 - `db_session` - Database session for tests
 - `test_client` - HTTP client for API testing
 - `authenticated_user_client` - Pre-authenticated user client
@@ -74,7 +75,11 @@ Available fixtures in `conftest.py`:
 
 ## Test Data
 
-Tests use a separate SQLite database (`test.db`) to avoid affecting development data. The database is created and destroyed automatically during test execution.
+Tests use a separate SQLite database (`test.db`) to avoid affecting development data. The database is created, seeded with test users/wards/trucks, and destroyed automatically during test execution. Seeded credentials:
+
+- User: `user@example.com` / `user123` (ward 1)
+- Ward Admin: `ward@example.com` / `ward123` (ward 1)
+- Municipality Admin: `municipality@example.com` / `muni123`
 
 ## Coverage Goals
 

@@ -3,14 +3,14 @@ Authentication tests for the waste management system.
 Tests login, registration, and JWT token validation.
 """
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
 @pytest.mark.asyncio
 async def test_login_success():
     """Test successful login with valid credentials."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/api/v1/auth/login",
             data={"username": "user@example.com", "password": "user123"}
@@ -25,7 +25,7 @@ async def test_login_success():
 @pytest.mark.asyncio
 async def test_login_invalid_credentials():
     """Test login with invalid credentials."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/api/v1/auth/login",
             data={"username": "user@example.com", "password": "wrongpassword"}
@@ -36,7 +36,7 @@ async def test_login_invalid_credentials():
 @pytest.mark.asyncio
 async def test_register_new_user():
     """Test user registration."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/api/v1/auth/register",
             json={
@@ -54,7 +54,7 @@ async def test_register_new_user():
 @pytest.mark.asyncio
 async def test_protected_endpoint_without_token():
     """Test accessing protected endpoint without token."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/trucks")
         assert response.status_code == 401
 
@@ -62,7 +62,7 @@ async def test_protected_endpoint_without_token():
 @pytest.mark.asyncio
 async def test_protected_endpoint_with_invalid_token():
     """Test accessing protected endpoint with invalid token."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get(
             "/api/v1/trucks",
             headers={"Authorization": "Bearer invalid_token"}
