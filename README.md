@@ -483,6 +483,32 @@ If you encounter "operation not supported" errors with Docker networking:
 - Check nginx configuration in `nginx.conf`
 - For local mode, open HTML files directly in browser
 
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- **[Architecture Documentation](docs/ARCHITECTURE.md)** - System design and component architecture
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
+- **[Code Guardrails](docs/GUARDRAILS.md)** - Development standards and best practices
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive testing guide
+
+## Testing
+
+The project includes a comprehensive test suite in the `tests/` directory:
+
+```bash
+# Install test dependencies
+pip install -r tests/requirements.txt
+
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=app --cov-report=html
+```
+
+See [tests/README.md](tests/README.md) for detailed testing information.
+
 ## License
 
 This is an MVP project for demonstration purposes.
