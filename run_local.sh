@@ -42,7 +42,8 @@ echo "Starting Model Service on port 8001..."
 cd model-service
 python3 -m venv venv 2>/dev/null || true
 source venv/bin/activate 2>/dev/null || source venv/bin/activate
-pip install -q -r requirements.txt
+pip install -q --upgrade pip
+pip install -q -r requirements.txt || echo "Some packages may have failed, continuing..."
 export MOCK_MODE="true"
 python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8001 &
 MODEL_PID=$!
@@ -56,7 +57,8 @@ echo "Starting Backend on port 8000..."
 cd backend
 python3 -m venv venv 2>/dev/null || true
 source venv/bin/activate 2>/dev/null || source venv/bin/activate
-pip install -q -r requirements.txt
+pip install -q --upgrade pip
+pip install -q -r requirements.txt || echo "Some packages may have failed, continuing..."
 export MODEL_SERVICE_URL="http://localhost:8001"
 export SECRET_KEY="dev-secret-key-change-in-production"
 export ALGORITHM="HS256"
