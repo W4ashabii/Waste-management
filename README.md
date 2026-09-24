@@ -24,10 +24,11 @@ A complete waste-segregation system with camera-based detection, truck managemen
 
 ### Prerequisites
 
-- Docker and Docker Compose installed
+- Docker and Docker Compose installed (for Docker deployment)
+- Python 3.11+ (for local development)
 - Port 8000, 8001, 5432, and 80 available
 
-### Run with Docker Compose
+### Option 1: Run with Docker Compose
 
 ```bash
 # Build and start all services
@@ -38,6 +39,20 @@ docker-compose up --build
 # - Model Service: http://localhost:8001
 # - Frontends: http://localhost:80/user/, http://localhost:80/ward/, http://localhost:80/municipality/
 # - Database: localhost:5432
+```
+
+### Option 2: Run Locally (No Docker Networking)
+
+If you encounter Docker networking issues, use the local development script:
+
+```bash
+# Run services locally using Python
+./run_local.sh
+
+# Services will be available at:
+# - Backend API: http://localhost:8000
+# - Model Service: http://localhost:8001
+# - Frontends: Open HTML files directly in browser
 ```
 
 ### Seed the Database
@@ -442,21 +457,31 @@ The current MVP focuses on trucks and detection. To add full CRUD for wards and 
 
 ## Troubleshooting
 
+### Docker Networking Issues
+If you encounter "operation not supported" errors with Docker networking:
+- Use the local development script: `./run_local.sh`
+- Or try restarting Docker: `sudo systemctl restart docker`
+- Check Docker daemon logs: `sudo journalctl -u docker`
+
 ### Database Connection Issues
 - Ensure PostgreSQL container is healthy: `docker-compose ps`
 - Check database logs: `docker-compose logs db`
+- For local mode, ensure PostgreSQL is running and database exists
 
 ### Model Service Unreachable
 - Verify model-service is running: `curl http://localhost:8001/health`
 - Check model-service logs: `docker-compose logs model-service`
+- For local mode, check if the Python process is running
 
 ### WebSocket Connection Failed
 - Ensure backend is running: `curl http://localhost:8000/api/v1/health`
 - Check firewall settings for WebSocket connections
+- Verify backend logs for WebSocket connection errors
 
 ### Frontend Not Loading
 - Ensure nginx is running: `docker-compose ps nginx`
 - Check nginx configuration in `nginx.conf`
+- For local mode, open HTML files directly in browser
 
 ## License
 
