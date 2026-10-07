@@ -1,13 +1,10 @@
-import os
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.config import settings
 from app.models import Base
 
-# Support both PostgreSQL and SQLite based on environment
-DATABASE_URL = os.getenv("DATABASE_URL", settings.DATABASE_URL)
-engine = create_async_engine(DATABASE_URL, echo=True)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+engine = create_async_engine(settings.DATABASE_URL, echo=settings.SQL_ECHO)
+async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_db():

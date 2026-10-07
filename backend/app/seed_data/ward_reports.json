@@ -1,0 +1,62 @@
+[
+  {
+    "id": 0,
+    "ty": "Collection not completed",
+    "src": "Citizen",
+    "d": "Oct 5",
+    "s": "Pending",
+    "rt": 3,
+    "ds": "Collection vehicle did not arrive during the scheduled time.",
+    "c": "Collection",
+    "loc": "Baneshwor lane 4",
+    "notes": []
+  },
+  {
+    "id": 1,
+    "ty": "Overflowing bin",
+    "src": "Citizen",
+    "d": "Oct 4",
+    "s": "Pending",
+    "rt": 4,
+    "ds": "Bin near Gaushala chowk overflowing for two days.",
+    "c": "Waste",
+    "loc": "Gaushala chowk",
+    "notes": []
+  },
+  {
+    "id": 2,
+    "ty": "Late pickup",
+    "src": "Citizen",
+    "d": "Oct 3",
+    "s": "In Progress",
+    "rt": 3,
+    "ds": "Pickup comes about 2 hours late.",
+    "c": "Collection",
+    "loc": "Baneshwor lane 7",
+    "notes": []
+  },
+  {
+    "id": 3,
+    "ty": "Illegal dumping",
+    "src": "Ward staff",
+    "d": "Oct 3",
+    "s": "In Progress",
+    "rt": 2,
+    "ds": "Waste dumped near Tinkune bridge.",
+    "c": "Waste",
+    "loc": "Tinkune bridge",
+    "notes": []
+  },
+  {
+    "id": 4,
+    "ty": "Missed pickup",
+    "src": "Citizen",
+    "d": "Oct 1",
+    "s": "Resolved",
+    "rt": 1,
+    "ds": "Missed Monday pickup; collected next day.",
+    "c": "Collection",
+    "loc": "Koteshwor",
+    "notes": []
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "c": "Collection",
+    "t": "Collection timing changed for Route 3",
+    "b": "Previous: 8:00 AM → New: 9:30 AM",
+    "d": "Oct 5",
+    "id": 0
+  },
+  {
+    "c": "Guidance",
+    "t": "Please separate organic and inorganic waste",
+    "b": "Green bin for kitchen waste, blue bin for dry recyclables.",
+    "d": "Oct 3",
+    "id": 1
+  },
+  {
+    "c": "Milestones",
+    "t": "Ward 17 recycled 2 tons of plastic in September",
+    "b": "Thank you, neighbours.",
+    "d": "Oct 1",
+    "id": 2
+  }
+]

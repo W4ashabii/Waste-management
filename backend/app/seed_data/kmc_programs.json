@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "n": "Waste Segregation Awareness",
+    "w": 17,
+    "d": "Oct 12, 2026",
+    "tm": "11:00 AM",
+    "exp": 50,
+    "reg": 46,
+    "att": 0,
+    "s": "Upcoming",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  },
+  {
+    "id": 2,
+    "n": "Composting at Home",
+    "w": 19,
+    "d": "Oct 5, 2026",
+    "tm": "10:00 AM",
+    "exp": 60,
+    "reg": 55,
+    "att": 52,
+    "s": "Running",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  },
+  {
+    "id": 3,
+    "n": "Plastic-Free Market Drive",
+    "w": 18,
+    "d": "Oct 5, 2026",
+    "tm": "2:00 PM",
+    "exp": 40,
+    "reg": 34,
+    "att": 31,
+    "s": "Running",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  },
+  {
+    "id": 4,
+    "n": "School Clean-up Day",
+    "w": 5,
+    "d": "Oct 20, 2026",
+    "tm": "9:00 AM",
+    "exp": 80,
+    "reg": 30,
+    "att": 0,
+    "s": "Upcoming",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  },
+  {
+    "id": 5,
+    "n": "Waste Segregation Awareness",
+    "w": 17,
+    "d": "Sep 14, 2026",
+    "tm": "11:00 AM",
+    "exp": 50,
+    "reg": 46,
+    "att": 43,
+    "s": "Completed",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  },
+  {
+    "id": 6,
+    "n": "Household Recycling Basics",
+    "w": 24,
+    "d": "Sep 28, 2026",
+    "tm": "10:30 AM",
+    "exp": 50,
+    "reg": 48,
+    "att": 47,
+    "s": "Completed",
+    "ds": "Learn how to separate kitchen waste, dry recyclables and hazardous waste at home."
+  }
+]

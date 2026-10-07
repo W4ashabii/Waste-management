@@ -1,0 +1,26 @@
+[
+  {
+    "c": "Collection",
+    "t": "Ward 17 collection time changed",
+    "b": "Previous: 8:00 AM → New: 9:30 AM",
+    "w": "Ward 17",
+    "d": "Oct 5",
+    "id": 0
+  },
+  {
+    "c": "Guidance",
+    "t": "How to separate household waste",
+    "b": "Green bin for kitchen waste, blue bin for dry recyclables.",
+    "w": "All wards",
+    "d": "Oct 3",
+    "id": 1
+  },
+  {
+    "c": "Milestones",
+    "t": "Kathmandu completes 1 month of improved waste segregation",
+    "b": "Thank you to every household and ward office.",
+    "w": "All wards",
+    "d": "Oct 1",
+    "id": 2
+  }
+]

@@ -1,147 +1,148 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON, Boolean, Enum as SQLEnum
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+"""Database models. Field names follow the domain; app/serializers.py maps them to
+the short keys the Next.js frontend uses (n, t, drv, st, ...)."""
 from datetime import datetime
-import enum
 
-Base = declarative_base()
-
-
-class UserRole(str, enum.Enum):
-    USER = "user"
-    WARD_ADMIN = "ward_admin"
-    MUNICIPALITY_ADMIN = "municipality_admin"
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-class TruckState(str, enum.Enum):
-    IDLE = "idle"
-    DISPATCHED = "dispatched"
-    ENROUTE = "enroute"
-    COLLECTING = "collecting"
-    COMPLETED = "completed"
+class Base(DeclarativeBase):
+    pass
 
 
-class TaskState(str, enum.Enum):
-    PENDING = "pending"
-    DISPATCHED = "dispatched"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-
-
-class Municipality(Base):
-    __tablename__ = "municipalities"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    wards = relationship("Ward", back_populates="municipality")
-
-
-class Ward(Base):
-    __tablename__ = "wards"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    municipality_id = Column(Integer, ForeignKey("municipalities.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    municipality = relationship("Municipality", back_populates="wards")
-    users = relationship("User", back_populates="ward")
-    cameras = relationship("Camera", back_populates="ward")
-    trucks = relationship("Truck", back_populates="ward_assigned")
-    detection_records = relationship("DetectionRecord", back_populates="ward")
-    alerts = relationship("Alert", back_populates="ward")
-    truck_tasks = relationship("TruckTask", back_populates="ward")
+class Portal:
+    KMC = "kmc"
+    WARD = "ward"
 
 
 class User(Base):
     __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    email = Column(String, unique=True, index=True)
-    password_hash = Column(String)
-    role = Column(SQLEnum(UserRole), default=UserRole.USER)
-    ward_id = Column(Integer, ForeignKey("wards.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    ward = relationship("Ward", back_populates="users")
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    role: Mapped[str] = mapped_column(String(120))  # job title shown in the UI
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    portal: Mapped[str] = mapped_column(String(10))  # Portal.KMC | Portal.WARD
+    ward: Mapped[int | None] = mapped_column(ForeignKey("wards.n"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-class Camera(Base):
-    __tablename__ = "cameras"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    ward_id = Column(Integer, ForeignKey("wards.id"))
-    location = Column(String)
-    last_seen = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    ward = relationship("Ward", back_populates="cameras")
-    detection_records = relationship("DetectionRecord", back_populates="camera")
+class Ward(Base):
+    __tablename__ = "wards"
+
+    n: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    tons: Mapped[float] = mapped_column(Float, default=0)
+    vehicle_count: Mapped[int] = mapped_column(Integer, default=0)
+    completion: Mapped[int] = mapped_column(Integer, default=0)
+    # Today's collection status: Completed | In Progress | Delayed | Incomplete
+    status: Mapped[str] = mapped_column(String(20), default="In Progress")
+    schedule_time: Mapped[str] = mapped_column(String(5), default="08:00")
+    schedule_kind: Mapped[str] = mapped_column(String(40), default="Organic + Inorganic")
 
 
-class Truck(Base):
-    __tablename__ = "trucks"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    plate_no = Column(String, unique=True, index=True)
-    ward_id_assigned = Column(Integer, ForeignKey("wards.id"))
-    state = Column(SQLEnum(TruckState), default=TruckState.IDLE)
-    last_location = Column(String)
-    capacity = Column(Integer, default=100)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    ward_assigned = relationship("Ward", back_populates="trucks")
-    tasks = relationship("TruckTask", back_populates="truck")
+class Driver(Base):
+    __tablename__ = "drivers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True)
 
 
-class DetectionRecord(Base):
-    __tablename__ = "detection_records"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    camera_id = Column(Integer, ForeignKey("cameras.id"), nullable=True)
-    ward_id = Column(Integer, ForeignKey("wards.id"))
-    image_url = Column(String, nullable=True)
-    label = Column(String)  # degradable or non_degradable
-    confidence = Column(Float)
-    bbox = Column(JSON)  # bounding boxes
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    
-    camera = relationship("Camera", back_populates="detection_records")
-    ward = relationship("Ward", back_populates="detection_records")
-    alerts = relationship("Alert", back_populates="detection_record")
+class Vehicle(Base):
+    __tablename__ = "vehicles"
+
+    id: Mapped[str] = mapped_column(String(20), primary_key=True)  # plate, e.g. KMC-04
+    driver: Mapped[str] = mapped_column(String(120), default="")
+    capacity: Mapped[int] = mapped_column(Integer, default=5)
+    status: Mapped[str] = mapped_column(String(20), default="Active")  # Active | Idle | Maintenance
+    note: Mapped[str] = mapped_column(String(255), default="")
+    ward: Mapped[int | None] = mapped_column(ForeignKey("wards.n"), nullable=True)
 
 
-class Alert(Base):
-    __tablename__ = "alerts"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    ward_id = Column(Integer, ForeignKey("wards.id"))
-    detection_id = Column(Integer, ForeignKey("detection_records.id"))
-    severity = Column(String, default="medium")
-    is_acknowledged = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    ward = relationship("Ward", back_populates="alerts")
-    detection_record = relationship("DetectionRecord", back_populates="alerts")
-    truck_tasks = relationship("TruckTask", back_populates="alert")
+class Route(Base):
+    __tablename__ = "routes"
+    __table_args__ = (UniqueConstraint("ward", "n"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ward: Mapped[int] = mapped_column(ForeignKey("wards.n"), index=True)
+    n: Mapped[int] = mapped_column(Integer)
+    vehicle: Mapped[str] = mapped_column(String(20), default="")
+    area: Mapped[str] = mapped_column(String(120), default="")
+    # Upcoming | In Progress | Completed | Delayed | Incomplete
+    status: Mapped[str] = mapped_column(String(20), default="Upcoming")
+    kg: Mapped[int] = mapped_column(Integer, default=0)
+    time: Mapped[str] = mapped_column(String(5), default="08:00")
 
 
-class TruckTask(Base):
-    __tablename__ = "truck_tasks"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    truck_id = Column(Integer, ForeignKey("trucks.id"))
-    ward_id = Column(Integer, ForeignKey("wards.id"))
-    alert_id = Column(Integer, ForeignKey("alerts.id"))
-    state = Column(SQLEnum(TaskState), default=TaskState.PENDING)
-    dispatched_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    truck = relationship("Truck", back_populates="tasks")
-    ward = relationship("Ward", back_populates="truck_tasks")
-    alert = relationship("Alert", back_populates="truck_tasks")
+class Program(Base):
+    __tablename__ = "programs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    ward: Mapped[int] = mapped_column(ForeignKey("wards.n"), index=True)
+    date: Mapped[str] = mapped_column(String(40))
+    time: Mapped[str] = mapped_column(String(20))
+    location: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    expected: Mapped[int] = mapped_column(Integer, default=0)
+    registered: Mapped[int] = mapped_column(Integer, default=0)
+    attended: Mapped[int] = mapped_column(Integer, default=0)
+    # Canonical status: Upcoming | Running | Completed (the ward portal calls
+    # these Scheduled | Ongoing | Completed; see serializers.py).
+    status: Mapped[str] = mapped_column(String(20), default="Upcoming")
+    # Approved | Pending KMC review | Needs changes
+    approval: Mapped[str] = mapped_column(String(40), default="Approved")
+    description: Mapped[str] = mapped_column(Text, default="")
+
+
+class Update(Base):
+    __tablename__ = "updates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    category: Mapped[str] = mapped_column(String(40))
+    title: Mapped[str] = mapped_column(String(255))
+    body: Mapped[str] = mapped_column(Text, default="")
+    audience: Mapped[str] = mapped_column(String(40), default="All wards")  # "All wards" | "Ward 17"
+    date: Mapped[str] = mapped_column(String(20))
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    type: Mapped[str] = mapped_column(String(120))
+    ward: Mapped[int] = mapped_column(ForeignKey("wards.n"), index=True)
+    source: Mapped[str] = mapped_column(String(40))
+    date: Mapped[str] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(20), default="Pending")  # Pending | In Progress | Resolved
+    route: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    description: Mapped[str] = mapped_column(Text, default="")
+    category: Mapped[str] = mapped_column(String(40), default="Other")
+    location: Mapped[str] = mapped_column(String(200), default="")
+    notes: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # "kmc" for the KMC portal, "ward:<n>" for one ward's portal.
+    scope: Mapped[str] = mapped_column(String(20), index=True)
+    text: Mapped[str] = mapped_column(String(255))
+    href: Mapped[str] = mapped_column(String(120))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Identification(Base):
+    """One photo classified by the waste model."""
+
+    __tablename__ = "identifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ward: Mapped[int | None] = mapped_column(ForeignKey("wards.n"), nullable=True, index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    label: Mapped[str] = mapped_column(String(20))  # model class: Bio | Non_Bio
+    category: Mapped[str] = mapped_column(String(20))  # degradable | non_degradable
+    confidence: Mapped[float] = mapped_column(Float)
+    probabilities: Mapped[dict] = mapped_column(JSON, default=dict)
+    filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)

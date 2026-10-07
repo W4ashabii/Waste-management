@@ -1,0 +1,122 @@
+[
+  {
+    "id": 0,
+    "ty": "Collection not completed",
+    "w": 17,
+    "src": "Citizen",
+    "d": "Oct 5",
+    "s": "In Progress",
+    "ds": "Truck did not arrive at the scheduled time.",
+    "c": "Collection"
+  },
+  {
+    "id": 1,
+    "ty": "Overflowing bin",
+    "w": 17,
+    "src": "Citizen",
+    "d": "Oct 4",
+    "s": "Pending",
+    "ds": "Bin near Gaushala chowk overflowing for two days.",
+    "c": "Waste"
+  },
+  {
+    "id": 2,
+    "ty": "Late pickup",
+    "w": 17,
+    "src": "Citizen",
+    "d": "Oct 3",
+    "s": "Pending",
+    "ds": "Pickup in Baneshwor lane 4 comes 2 hours late.",
+    "c": "Collection"
+  },
+  {
+    "id": 3,
+    "ty": "Illegal dumping",
+    "w": 17,
+    "src": "Ward",
+    "d": "Oct 3",
+    "s": "In Progress",
+    "ds": "Waste dumped near Tinkune bridge.",
+    "c": "Waste"
+  },
+  {
+    "id": 4,
+    "ty": "Missed pickup",
+    "w": 17,
+    "src": "Citizen",
+    "d": "Oct 1",
+    "s": "Resolved",
+    "ds": "Missed Monday pickup; collected next day.",
+    "c": "Collection"
+  },
+  {
+    "id": 5,
+    "ty": "Vehicle breakdown",
+    "w": 12,
+    "src": "Driver",
+    "d": "Oct 5",
+    "s": "In Progress",
+    "ds": "KMC-03 stopped due to a flat tyre.",
+    "c": "Vehicle"
+  },
+  {
+    "id": 6,
+    "ty": "Collection not completed",
+    "w": 21,
+    "src": "Citizen",
+    "d": "Oct 4",
+    "s": "Pending",
+    "ds": "Kalanki lane not collected for 2 days.",
+    "c": "Collection"
+  },
+  {
+    "id": 7,
+    "ty": "Route blocked",
+    "w": 21,
+    "src": "Driver",
+    "d": "Oct 5",
+    "s": "Pending",
+    "ds": "Road work blocks truck access.",
+    "c": "Route"
+  },
+  {
+    "id": 8,
+    "ty": "Illegal dumping",
+    "w": 8,
+    "src": "Ward",
+    "d": "Oct 3",
+    "s": "Pending",
+    "ds": "Dumping along Tukucha riverbank.",
+    "c": "Waste"
+  },
+  {
+    "id": 9,
+    "ty": "Missed pickup",
+    "w": 5,
+    "src": "Citizen",
+    "d": "Oct 2",
+    "s": "In Progress",
+    "ds": "Pickup missed Sunday.",
+    "c": "Collection"
+  },
+  {
+    "id": 10,
+    "ty": "Overflowing bin",
+    "w": 27,
+    "src": "Citizen",
+    "d": "Oct 4",
+    "s": "Resolved",
+    "ds": "Bin emptied Oct 5.",
+    "c": "Waste"
+  },
+  {
+    "id": 11,
+    "ty": "Late pickup",
+    "w": 4,
+    "src": "Citizen",
+    "d": "Oct 2",
+    "s": "Resolved",
+    "ds": "Time corrected by ward.",
+    "c": "Collection"
+  }
+]

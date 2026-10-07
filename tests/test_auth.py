@@ -1,70 +1,57 @@
-"""
-Authentication tests for the waste management system.
-Tests login, registration, and JWT token validation.
-"""
-import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app
+from conftest import DEMO_PASSWORD, KMC_EMAIL, WARD_EMAIL
 
 
-@pytest.mark.asyncio
-async def test_login_success():
-    """Test successful login with valid credentials."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/api/v1/auth/login",
-            data={"username": "user@example.com", "password": "user123"}
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert "access_token" in data
-        assert data["token_type"] == "bearer"
-        assert data["user"]["email"] == "user@example.com"
+async def test_login_returns_token_and_user(client):
+    r = await client.post("/api/v1/auth/login", json={"email": KMC_EMAIL, "password": DEMO_PASSWORD, "portal": "kmc"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["token_type"] == "bearer"
+    assert body["user"]["name"] == "Anita Shrestha"
+    assert body["user"]["portal"] == "kmc"
 
 
-@pytest.mark.asyncio
-async def test_login_invalid_credentials():
-    """Test login with invalid credentials."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/api/v1/auth/login",
-            data={"username": "user@example.com", "password": "wrongpassword"}
-        )
-        assert response.status_code == 401
+async def test_login_wrong_password(client):
+    r = await client.post("/api/v1/auth/login", json={"email": KMC_EMAIL, "password": "nope", "portal": "kmc"})
+    assert r.status_code == 401
 
 
-@pytest.mark.asyncio
-async def test_register_new_user():
-    """Test user registration."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={
-                "name": "Test User",
-                "email": "testuser@example.com",
-                "password": "testpass123",
-                "role": "user"
-            }
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert "user_id" in data
+async def test_login_wrong_portal(client):
+    r = await client.post("/api/v1/auth/login", json={"email": WARD_EMAIL, "password": DEMO_PASSWORD, "portal": "kmc"})
+    assert r.status_code == 403
 
 
-@pytest.mark.asyncio
-async def test_protected_endpoint_without_token():
-    """Test accessing protected endpoint without token."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get("/api/v1/trucks")
-        assert response.status_code == 401
+async def test_signup_then_select_ward(client):
+    r = await client.post("/api/v1/auth/signup", json={
+        "name": "New Staff", "role": "", "email": "New@Example.com", "password": "secret1", "portal": "ward"})
+    assert r.status_code == 201
+    user = r.json()["user"]
+    assert user["email"] == "new@example.com" and user["role"] == "Ward Staff" and user["ward"] is None
+    client.headers["Authorization"] = f"Bearer {r.json()['access_token']}"
+
+    r = await client.patch("/api/v1/me", json={"ward": 5})
+    assert r.json()["ward"] == 5
+    assert (await client.get("/api/v1/wards/5/state")).status_code == 200
+    assert (await client.get("/api/v1/wards/17/state")).status_code == 403
 
 
-@pytest.mark.asyncio
-async def test_protected_endpoint_with_invalid_token():
-    """Test accessing protected endpoint with invalid token."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get(
-            "/api/v1/trucks",
-            headers={"Authorization": "Bearer invalid_token"}
-        )
-        assert response.status_code == 401
+async def test_signup_duplicate_email(client):
+    r = await client.post("/api/v1/auth/signup", json={
+        "name": "X", "email": KMC_EMAIL, "password": "secret1", "portal": "kmc"})
+    assert r.status_code == 400
+
+
+async def test_requires_auth(client):
+    assert (await client.get("/api/v1/me")).status_code == 401
+    assert (await client.get("/api/v1/kmc/state")).status_code == 401
+
+
+async def test_update_profile_and_password(ward):
+    r = await ward.patch("/api/v1/me", json={"name": "Binod M.", "role": "Ward Chair"})
+    assert r.json()["name"] == "Binod M." and r.json()["role"] == "Ward Chair"
+
+    r = await ward.post("/api/v1/me/password", json={"current_password": "bad", "new_password": "newpass1"})
+    assert r.status_code == 400
+    r = await ward.post("/api/v1/me/password", json={"current_password": DEMO_PASSWORD, "new_password": "newpass1"})
+    assert r.status_code == 204
+    r = await ward.post("/api/v1/auth/login", json={"email": WARD_EMAIL, "password": "newpass1", "portal": "ward"})
+    assert r.status_code == 200

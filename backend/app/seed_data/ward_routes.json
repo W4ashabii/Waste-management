@@ -1,0 +1,30 @@
+[
+  {
+    "n": 1,
+    "v": "KMC-17",
+    "area": "Koteshwor",
+    "s": "Completed",
+    "kg": 12400
+  },
+  {
+    "n": 2,
+    "v": "KMC-21",
+    "area": "Tinkune",
+    "s": "Completed",
+    "kg": 15150
+  },
+  {
+    "n": 3,
+    "v": "KMC-04",
+    "area": "Baneshwor",
+    "s": "In Progress",
+    "kg": 0
+  },
+  {
+    "n": 4,
+    "v": "KMC-21",
+    "area": "Gaushala",
+    "s": "Upcoming",
+    "kg": 0
+  }
+]

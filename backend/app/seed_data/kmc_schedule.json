@@ -1,0 +1,162 @@
+[
+  {
+    "ward": 1,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 2,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 3,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 4,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 5,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 6,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 7,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 8,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 9,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 10,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 11,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 12,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 13,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 14,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 15,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 16,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 17,
+    "time": "08:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 18,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 19,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 20,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 21,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 22,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 23,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 24,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 25,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 26,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 27,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 28,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 29,
+    "time": "07:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 30,
+    "time": "08:30",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 31,
+    "time": "09:00",
+    "kind": "Organic + Inorganic"
+  },
+  {
+    "ward": 32,
+    "time": "06:30",
+    "kind": "Organic + Inorganic"
+  }
+]
