@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "n": "Waste Segregation Awareness",
+    "d": "Oct 12, 2026",
+    "tm": "11:00 AM",
+    "loc": "Ward Community Hall",
+    "exp": 50,
+    "reg": 43,
+    "att": 0,
+    "s": "Scheduled",
+    "ap": "Approved",
+    "ds": "Household waste segregation awareness session."
+  },
+  {
+    "id": 2,
+    "n": "Composting at Home",
+    "d": "Oct 5, 2026",
+    "tm": "10:00 AM",
+    "loc": "Ward Office",
+    "exp": 40,
+    "reg": 38,
+    "att": 30,
+    "s": "Ongoing",
+    "ap": "Approved",
+    "ds": "Making compost from kitchen waste."
+  },
+  {
+    "id": 3,
+    "n": "Plastic-Free Market Drive",
+    "d": "Sep 21, 2026",
+    "tm": "2:00 PM",
+    "loc": "Gaushala Market",
+    "exp": 50,
+    "reg": 46,
+    "att": 43,
+    "s": "Completed",
+    "ap": "Approved",
+    "ds": "Reducing plastic bags in the local market."
+  },
+  {
+    "id": 4,
+    "n": "Ward Clean-up with Schools",
+    "d": "Oct 26, 2026",
+    "tm": "9:00 AM",
+    "loc": "Pashupati Road",
+    "exp": 150,
+    "reg": 0,
+    "att": 0,
+    "s": "Scheduled",
+    "ap": "Pending KMC review",
+    "ds": "City-level coordination with nearby wards."
+  }
+]

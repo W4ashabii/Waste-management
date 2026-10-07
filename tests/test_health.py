@@ -1,25 +1,23 @@
-"""
-Health endpoint tests for the waste management system.
-Verifies that both `/health` and `/api/v1/health` respond successfully.
-"""
-import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app
+async def test_health(client):
+    for path in ("/health", "/api/v1/health"):
+        r = await client.get(path)
+        assert r.status_code == 200
+        assert r.json()["status"] == "healthy"
 
 
-@pytest.mark.asyncio
-async def test_health_root():
-    """Test the root healthcheck endpoint."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get("/health")
-        assert response.status_code == 200
-        assert response.json() == {"status": "healthy"}
+async def test_cors_allows_frontend_origin(client):
+    r = await client.options(
+        "/api/v1/auth/login",
+        headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "POST",
+                 "Access-Control-Request-Headers": "content-type,authorization"},
+    )
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:3000"
 
 
-@pytest.mark.asyncio
-async def test_health_api_v1():
-    """Test the versioned health endpoint."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.get("/api/v1/health")
-        assert response.status_code == 200
-        assert response.json() == {"status": "healthy"}
+async def test_cors_rejects_unknown_origin(client):
+    r = await client.options(
+        "/api/v1/auth/login",
+        headers={"Origin": "http://evil.example", "Access-Control-Request-Method": "POST"},
+    )
+    assert "access-control-allow-origin" not in r.headers

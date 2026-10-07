@@ -1,0 +1,58 @@
+[
+  {
+    "id": "KMC-01",
+    "drv": "Ram Thapa",
+    "cap": 8,
+    "st": "Active",
+    "note": "Serviced Sep 8"
+  },
+  {
+    "id": "KMC-02",
+    "drv": "Sita Gurung",
+    "cap": 6,
+    "st": "Active",
+    "note": "Serviced Sep 9"
+  },
+  {
+    "id": "KMC-03",
+    "drv": "Bikash Shrestha",
+    "cap": 8,
+    "st": "Active",
+    "note": "Serviced Sep 10"
+  },
+  {
+    "id": "KMC-04",
+    "drv": "Hari Adhikari",
+    "cap": 5,
+    "st": "Active",
+    "note": "Due in 12 days"
+  },
+  {
+    "id": "KMC-05",
+    "drv": "Suman Tamang",
+    "cap": 8,
+    "st": "Active",
+    "note": "Serviced Sep 12"
+  },
+  {
+    "id": "KMC-06",
+    "drv": "Krishna Maharjan",
+    "cap": 6,
+    "st": "Maintenance",
+    "note": "In workshop since Oct 3"
+  },
+  {
+    "id": "KMC-07",
+    "drv": "Nabin Karki",
+    "cap": 8,
+    "st": "Idle",
+    "note": "Serviced Sep 14"
+  },
+  {
+    "id": "KMC-08",
+    "drv": "Deepak Rai",
+    "cap": 6,
+    "st": "Active",
+    "note": "Serviced Sep 15"
+  }
+]

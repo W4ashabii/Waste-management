@@ -1,75 +1,53 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
-from typing import List, Optional
-import random
+
+from app.classifier import InvalidImage, classifier
 from app.config import settings
 
-app = FastAPI(title="YOLOv8 Model Service")
 
-
-class BBox(BaseModel):
-    x: int
-    y: int
-    w: int
-    h: int
-
-
-class Prediction(BaseModel):
+class ClassifyResponse(BaseModel):
     label: str
-    class_id: int
+    category: str
     confidence: float
-    bbox: List[int]
-
-
-class DetectionResponse(BaseModel):
-    predictions: List[Prediction]
+    probabilities: dict[str, float]
     inference_ms: int
 
 
-# TODO: Replace with actual YOLOv8 model loading
-# model = YOLO("yolov8n.pt")
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await run_in_threadpool(classifier.load)
+    yield
 
 
-@app.post("/detect", response_model=DetectionResponse)
-async def detect(image: UploadFile = File(...)):
-    """
-    Detect objects in image using YOLOv8 model.
-    In mock mode, returns deterministic test outputs.
-    """
-    if settings.MOCK_MODE:
-        # Mock mode for development - return deterministic predictions
-        mock_labels = ["plastic_bottle", "food_waste", "paper", "metal_can"]
-        selected_label = random.choice(mock_labels)
-        
-        predictions = [
-            {
-                "label": selected_label,
-                "class_id": mock_labels.index(selected_label),
-                "confidence": round(random.uniform(0.75, 0.98), 2),
-                "bbox": [random.randint(0, 100), random.randint(0, 100), 
-                        random.randint(50, 200), random.randint(50, 200)]
-            }
-        ]
-        
-        return {
-            "predictions": predictions,
-            "inference_ms": random.randint(80, 150)
-        }
-    else:
-        # TODO: Implement actual YOLOv8 inference
-        # from PIL import Image
-        # img = Image.open(image.file)
-        # results = model(img)
-        # ... process results ...
-        pass
+app = FastAPI(title="Waste Classifier Service", lifespan=lifespan)
+
+
+@app.post("/classify", response_model=ClassifyResponse)
+async def classify(image: UploadFile = File(...)):
+    data = await image.read(settings.MAX_IMAGE_BYTES + 1)
+    if not data:
+        raise HTTPException(status_code=400, detail="Empty file")
+    if len(data) > settings.MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image is too large")
+    try:
+        return await run_in_threadpool(classifier.classify, data)
+    except InvalidImage as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy" if classifier.loaded else "loading",
+        "model": settings.HF_REPO_ID,
+        "weights": str(classifier.weights) if classifier.weights else None,
+    }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8001)

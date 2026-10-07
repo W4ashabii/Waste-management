@@ -1,0 +1,30 @@
+[
+  {
+    "id": "KMC-04",
+    "drv": "Ram Thapa",
+    "cap": 5,
+    "st": "Active",
+    "note": "Due in 12 days"
+  },
+  {
+    "id": "KMC-17",
+    "drv": "Sita Gurung",
+    "cap": 6,
+    "st": "Active",
+    "note": "Serviced Sep 12"
+  },
+  {
+    "id": "KMC-21",
+    "drv": "Bikash Shrestha",
+    "cap": 5,
+    "st": "Active",
+    "note": "Serviced Sep 20"
+  },
+  {
+    "id": "KMC-33",
+    "drv": "Hari Adhikari",
+    "cap": 4,
+    "st": "Idle",
+    "note": "Serviced Aug 30"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "text": "Vehicle KMC-04 requires maintenance in 12 days",
+    "href": "/ward/collection"
+  },
+  {
+    "text": "New citizen complaint received",
+    "href": "/ward/reports"
+  },
+  {
+    "text": "Collection schedule changed",
+    "href": "/ward/updates"
+  }
+]
