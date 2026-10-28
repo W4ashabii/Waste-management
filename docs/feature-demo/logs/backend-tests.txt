@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- /home/sid/Projects/Waste-management/backend/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/sid/Projects/Waste-management
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-7.1.0, asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function
+collecting ... collected 46 items
+
+tests/test_auth.py::test_login_returns_token_and_user PASSED             [  2%]
+tests/test_auth.py::test_login_wrong_password PASSED                     [  4%]
+tests/test_auth.py::test_login_wrong_portal PASSED                       [  6%]
+tests/test_auth.py::test_signup_then_select_ward PASSED                  [  8%]
+tests/test_auth.py::test_signup_duplicate_email PASSED                   [ 10%]
+tests/test_auth.py::test_requires_auth PASSED                            [ 13%]
+tests/test_auth.py::test_update_profile_and_password PASSED              [ 15%]
+tests/test_health.py::test_health PASSED                                 [ 17%]
+tests/test_health.py::test_cors_allows_frontend_origin PASSED            [ 19%]
+tests/test_health.py::test_cors_rejects_unknown_origin PASSED            [ 21%]
+tests/test_identify.py::test_identify_anonymous PASSED                   [ 23%]
+tests/test_identify.py::test_identify_defaults_to_staff_ward_and_lists PASSED [ 26%]
+tests/test_identify.py::test_ward_staff_cannot_identify_for_other_ward PASSED [ 28%]
+tests/test_identify.py::test_kmc_lists_all_or_by_ward PASSED             [ 30%]
+tests/test_identify.py::test_empty_upload_rejected PASSED                [ 32%]
+tests/test_identify.py::test_model_service_down PASSED                   [ 34%]
+tests/test_identify.py::test_live_frame_is_not_saved PASSED              [ 36%]
+tests/test_kmc.py::test_kmc_only PASSED                                  [ 39%]
+tests/test_kmc.py::test_kmc_state_shape PASSED                           [ 41%]
+tests/test_kmc.py::test_ward_portal_changes_show_in_kmc PASSED           [ 43%]
+tests/test_kmc.py::test_complete_and_restart PASSED                      [ 45%]
+tests/test_kmc.py::test_assign_route PASSED                              [ 47%]
+tests/test_kmc.py::test_schedule_change_reaches_ward PASSED              [ 50%]
+tests/test_kmc.py::test_programs_updates_reports PASSED                  [ 52%]
+tests/test_sms.py::test_normalize_phone PASSED                           [ 54%]
+tests/test_sms.py::test_segments PASSED                                  [ 56%]
+tests/test_sms.py::test_ward_overview_lists_own_subscribers PASSED       [ 58%]
+tests/test_sms.py::test_ward_staff_cannot_see_other_ward PASSED          [ 60%]
+tests/test_sms.py::test_add_and_remove_subscriber PASSED                 [ 63%]
+tests/test_sms.py::test_broadcast_to_ward_is_recorded PASSED             [ 65%]
+tests/test_sms.py::test_test_message_to_one_number PASSED                [ 67%]
+tests/test_sms.py::test_kmc_broadcast_to_all_wards PASSED                [ 69%]
+tests/test_sms.py::test_send_to_ward_without_subscribers PASSED          [ 71%]
+tests/test_sms.py::test_route_delay_alerts_subscribers PASSED            [ 73%]
+tests/test_sms.py::test_kmc_schedule_change_alerts_ward PASSED           [ 76%]
+tests/test_sms.py::test_failed_send_is_recorded PASSED                   [ 78%]
+tests/test_ward.py::test_ward_state_matches_frontend_shape PASSED        [ 80%]
+tests/test_ward.py::test_ward_staff_cannot_open_other_ward PASSED        [ 82%]
+tests/test_ward.py::test_kmc_can_open_any_ward PASSED                    [ 84%]
+tests/test_ward.py::test_driver_completes_route_updates_tons_and_ward_status PASSED [ 86%]
+tests/test_ward.py::test_vehicle_problem_creates_report_and_notifies_kmc PASSED [ 89%]
+tests/test_ward.py::test_schedule_change_posts_update PASSED             [ 91%]
+tests/test_ward.py::test_assign_vehicle_and_driver PASSED                [ 93%]
+tests/test_ward.py::test_add_vehicle PASSED                              [ 95%]
+tests/test_ward.py::test_program_review_flow PASSED                      [ 97%]
+tests/test_ward.py::test_complaint_and_report_notes PASSED               [100%]
+
+============================= 46 passed in 38.12s ==============================

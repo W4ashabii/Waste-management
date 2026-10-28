@@ -1,0 +1,19 @@
+npm notice run kathmandu-waste-management@1.0.0 dev
+npm notice run next dev
+▲ Next.js 16.3.8 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.16.126:3000
+✓ Ready in 234ms
+✓ Running next.config.mjs took 12ms
+
+ GET / 200 in 192ms (next.js: 83ms, application-code: 109ms)
+ GET /ward/identify 200 in 50ms (next.js: 9ms, application-code: 41ms)
+ GET /ward/identify 200 in 25ms (next.js: 3ms, application-code: 22ms)
+ GET /ward/identify 200 in 27ms (next.js: 3ms, application-code: 25ms)
+ GET /ward/identify 200 in 33ms (next.js: 3ms, application-code: 30ms)
+ GET /ward/identify 200 in 26ms (next.js: 2ms, application-code: 24ms)
+ GET /ward/identify 200 in 21ms (next.js: 2ms, application-code: 18ms)
+ GET /ward/sms 200 in 29ms (next.js: 8ms, application-code: 21ms)
+ GET /ward/sms 200 in 28ms (next.js: 2ms, application-code: 25ms)
+ GET /ward/sms 200 in 25ms (next.js: 1.7ms, application-code: 23ms)
+ GET /kmc/sms 200 in 241ms (next.js: 220ms, application-code: 20ms)
