@@ -1,5 +1,8 @@
 """Waste identification: photos are classified by the local model service
 (W4ashabii/waste_classifier, YOLOv8s-cls: Bio vs Non_Bio)."""
+import logging
+from datetime import datetime
+
 import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, select
@@ -12,6 +15,7 @@ from app.models import Identification, Portal, User, Ward
 from app.serializers import identification_out
 
 router = APIRouter(prefix="/api/v1", tags=["identify"])
+log = logging.getLogger("app.identify")
 
 
 async def classify(data: bytes, filename: str, content_type: str) -> dict:
@@ -31,6 +35,8 @@ async def classify(data: bytes, filename: str, content_type: str) -> dict:
 async def identify(
     image: UploadFile = File(...),
     ward: int | None = Form(default=None),
+    # Live camera preview sends frames with save=false: classify without recording them.
+    save: bool = Form(default=True),
     user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -50,6 +56,17 @@ async def identify(
         raise HTTPException(status_code=413, detail="Image is too large")
 
     result = await classify(data, image.filename or "upload", image.content_type or "application/octet-stream")
+    log.info(
+        "%s %s -> %s (%.0f%%) in %sms, %d KB, ward=%s, user=%s", "Saved" if save else "Live frame", image.filename,
+        result["label"], result["confidence"] * 100, result.get("inference_ms"), len(data) // 1024, ward,
+        user.email if user else "anonymous",
+    )
+    if not save:
+        return {
+            "id": None, "ward": ward, "label": result["label"], "category": result["category"], "confidence": result["confidence"],
+            "probabilities": result["probabilities"], "filename": image.filename,
+            "created_at": datetime.utcnow().isoformat() + "Z", "inference_ms": result.get("inference_ms"),
+        }
     record = Identification(
         ward=ward, user_id=user.id if user else None, label=result["label"], category=result["category"],
         confidence=result["confidence"], probabilities=result["probabilities"], filename=image.filename,

@@ -1,7 +1,9 @@
 """Convert models to the JSON shapes used by the Next.js frontend (src/types)."""
 from datetime import datetime
 
-from app.models import Identification, Notification, Program, Report, Route, Update, User, Vehicle, Ward
+from app.models import (
+    Identification, Notification, Program, Report, Route, SmsMessage, Subscriber, Update, User, Vehicle, Ward,
+)
 
 # Canonical program status -> ward portal wording.
 WARD_PROGRAM_STATUS = {"Upcoming": "Scheduled", "Running": "Ongoing", "Completed": "Completed"}
@@ -70,4 +72,15 @@ def identification_out(i: Identification) -> dict:
     return {
         "id": i.id, "ward": i.ward, "label": i.label, "category": i.category, "confidence": i.confidence,
         "probabilities": i.probabilities or {}, "filename": i.filename, "created_at": i.created_at.isoformat() + "Z",
+    }
+
+
+def subscriber_out(s: Subscriber) -> dict:
+    return {"id": s.id, "name": s.name, "phone": s.phone, "ward": s.ward, "created_at": s.created_at.isoformat() + "Z"}
+
+
+def sms_out(m: SmsMessage) -> dict:
+    return {
+        "id": m.id, "phone": m.phone, "body": m.body, "ward": m.ward, "kind": m.kind, "status": m.status,
+        "provider": m.provider, "ref": m.provider_ref, "error": m.error, "created_at": m.created_at.isoformat() + "Z",
     }

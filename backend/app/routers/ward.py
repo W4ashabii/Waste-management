@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import sms
 from app.auth import get_current_user, require_ward_access
 from app.database import get_db
 from app.models import Driver, Notification, Program, Report, Update, User, Vehicle
@@ -123,6 +124,10 @@ async def driver_update(route_n: int, body: DriverUpdate, ward_n: int = Depends(
         ))
         notify(db, ward_scope(ward_n), f"Route {route_n} delayed: driver reported a vehicle problem", "/ward/reports")
         notify(db, KMC_SCOPE, f"Collection delayed in Ward {ward_n} (Route {route_n})", "/kmc/collection")
+        await sms.alert_ward(
+            db, ward_n, f"Collection on Route {route_n} ({route.area}) is delayed today by a vehicle problem. "
+            "We will update you when it resumes.", "delay",
+        )
     else:
         route.status = "Incomplete"
         notify(db, KMC_SCOPE, f"Route {route_n} incomplete in Ward {ward_n}", "/kmc/collection")
@@ -146,6 +151,10 @@ async def patch_route(route_n: int, body: RoutePatch, ward_n: int = Depends(ward
         ))
         notify(db, ward_scope(ward_n), f"Collection schedule changed for Route {route_n}", "/ward/updates")
         notify(db, KMC_SCOPE, f"Collection schedule changed in Ward {ward_n}", "/kmc/updates")
+        await sms.alert_ward(
+            db, ward_n, f"Collection time for Route {route_n} ({route.area}) changes from {format_time(old)} "
+            f"to {format_time(body.time)}.", "schedule",
+        )
     await db.commit()
     return ward_route(route)
 
@@ -171,16 +180,18 @@ async def create_program(body: WardProgramIn, ward_n: int = Depends(ward_access)
     if body.needsCoordination:
         notify(db, KMC_SCOPE, f"Ward {ward_n} requests review of \"{body.name}\"", "/kmc/awareness")
     else:
-        announce_program(db, program)
+        await announce_program(db, program)
     await db.commit()
     return ward_program(program)
 
 
-def announce_program(db: AsyncSession, p: Program) -> None:
+async def announce_program(db: AsyncSession, p: Program) -> None:
     db.add(Update(
         category="Awareness", title=f"{p.name} in Ward {p.ward}",
         body=f"{p.date}, {p.time} at {p.location}. Register in the Citizen app.", audience=f"Ward {p.ward}", date=today_short(),
     ))
+    where = f" at {p.location}" if p.location else ""
+    await sms.alert_ward(db, p.ward, f"{p.name} on {p.date}, {p.time}{where}. Everyone is welcome.", "program")
 
 
 @router.post("/updates", status_code=status.HTTP_201_CREATED)

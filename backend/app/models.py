@@ -146,3 +146,35 @@ class Identification(Base):
     probabilities: Mapped[dict] = mapped_column(JSON, default=dict)
     filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class Subscriber(Base):
+    """A resident who gets SMS alerts for their ward."""
+
+    __tablename__ = "subscribers"
+    __table_args__ = (UniqueConstraint("ward", "phone"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), default="")
+    phone: Mapped[str] = mapped_column(String(20), index=True)  # E.164, e.g. +9779841234567
+    ward: Mapped[int] = mapped_column(ForeignKey("wards.n"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class SmsMessage(Base):
+    """One SMS to one phone number: the outbox and delivery log."""
+
+    __tablename__ = "sms_messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    phone: Mapped[str] = mapped_column(String(20))
+    body: Mapped[str] = mapped_column(Text)
+    ward: Mapped[int | None] = mapped_column(ForeignKey("wards.n"), nullable=True, index=True)
+    # manual | test | schedule | delay | program
+    kind: Mapped[str] = mapped_column(String(20), default="manual")
+    status: Mapped[str] = mapped_column(String(10))  # sent | failed
+    provider: Mapped[str] = mapped_column(String(20))
+    provider_ref: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    error: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)

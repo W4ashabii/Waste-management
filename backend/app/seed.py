@@ -12,7 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_password_hash
-from app.models import Driver, Notification, Portal, Program, Report, Route, Update, User, Vehicle, Ward
+from app.models import Driver, Notification, Portal, Program, Report, Route, Subscriber, Update, User, Vehicle, Ward
 from app.services import KMC_SCOPE, ward_scope
 
 DATA = Path(__file__).parent / "seed_data"
@@ -36,6 +36,7 @@ def short_date_key(d: str) -> tuple[int, int]:
 async def seed(db: AsyncSession) -> bool:
     """Insert demo data if the database is empty. Returns True if it seeded."""
     if (await db.execute(select(func.count()).select_from(Ward))).scalar_one():
+        await seed_subscribers(db)  # databases seeded before SMS alerts existed
         return False
 
     meta = load("meta")
@@ -142,4 +143,13 @@ async def seed(db: AsyncSession) -> bool:
     ])
 
     await db.commit()
+    await seed_subscribers(db)
     return True
+
+
+async def seed_subscribers(db: AsyncSession) -> None:
+    """Demo SMS subscribers (fake 98000000xx numbers), if there are none yet."""
+    if (await db.execute(select(func.count()).select_from(Subscriber))).scalar_one():
+        return
+    db.add_all(Subscriber(name=s["name"], phone=s["phone"], ward=s["ward"]) for s in load("sms_subscribers"))
+    await db.commit()

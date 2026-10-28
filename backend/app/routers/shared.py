@@ -70,7 +70,7 @@ async def decide_program(program_id: int, body: Decision, user: User = Depends(g
     program.approval = "Approved" if body.approve else "Needs changes"
     if body.approve:
         program.status = "Upcoming"
-        announce_program(db, program)
+        await announce_program(db, program)
     notify(db, ward_scope(program.ward), f"KMC {'approved' if body.approve else 'requested changes to'} \"{program.name}\"", "/ward/awareness")
     await db.commit()
     return kmc_program(program)

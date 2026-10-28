@@ -33,6 +33,25 @@ See `.env.example`. The important ones:
 - `MODEL_SERVICE_URL` — where the backend sends photos (default `http://localhost:8001`).
 - `DATABASE_URL` — SQLite by default; `postgresql+asyncpg://...` in Docker.
 - `SEED_ON_STARTUP` — seed demo data into an empty database (default on). `python backend/seed_db.py --reset` re-seeds.
+- `SMS_PROVIDER` — `dummy` (default) or `sparrow`. See [SMS alerts](#sms-alerts).
+
+## SMS alerts
+
+Residents subscribe per ward (staff add them on the **SMS Alerts** page). They are texted automatically when a driver reports a delayed route, when a route's or ward's collection time changes, and when an awareness program is announced; staff can also broadcast a message or send a test to one number. Every message is stored (`sms_messages`) and shown in the page's outbox.
+
+The default `SMS_PROVIDER=dummy` sends nothing: each message is written to the backend log (`app.sms: [dummy] SMS to +977…`) and recorded as sent. To send real messages:
+
+1. Get a token and an approved sender identity from [Sparrow SMS](https://sparrowsms.com).
+2. Set `SMS_PROVIDER=sparrow`, `SPARROW_SMS_TOKEN=…` and `SMS_SENDER=…`, restart the backend.
+3. Send a test to your own number from the SMS Alerts page before broadcasting. `SparrowProvider` in `backend/app/sms.py` follows Sparrow's v2 API but has not been tried against the live gateway; check the outbox's error column if a send fails.
+
+Another gateway (Aakash SMS, Twilio, …) is a class with `name` and `async send(phone, text)` added to `provider()` in `app/sms.py`. Sends happen inside the request, one number at a time, which is fine for ward-sized lists; move them to a background job before broadcasting to thousands.
+
+Demo subscribers use fake `98000000xx` numbers (`backend/app/seed_data/sms_subscribers.json`).
+
+## Feature demo
+
+`docs/feature-demo/` has screenshots and logs of the camera and SMS features (see its README).
 
 ## API
 
@@ -44,7 +63,8 @@ Interactive docs: http://localhost:8000/docs. All routes are under `/api/v1` and
 | Ward portal | `GET /wards/{n}/state`; `POST /wards/{n}/routes/{r}/start`, `/driver-update`; `PATCH /wards/{n}/routes/{r}` (vehicle, time); `POST /wards/{n}/vehicles`, `/programs`, `/updates`, `/reports` |
 | KMC portal | `GET /kmc/state`; `POST /kmc/wards/{n}/complete`, `/restart`; `PUT /kmc/wards/{n}/assignment`, `/schedule`; `POST /kmc/vehicles`, `/programs`, `/updates` |
 | Shared | `PATCH /vehicles/{id}`; `POST /programs/{id}/decision`, `/resubmit`, `/start`, `/complete`, `/register`; `PATCH /reports/{id}` |
-| Identify | `POST /identify` (multipart `image`, optional `ward`; login optional) → `{label, category, confidence, probabilities}`; `GET /identifications?ward=` → recent items + counts |
+| Identify | `POST /identify` (multipart `image`, optional `ward`, `save=false` for live-video frames that should not be stored; login optional) → `{label, category, confidence, probabilities}`; `GET /identifications?ward=` → recent items + counts |
+| SMS | `GET /sms?ward=` (subscribers, outbox, counts, provider); `POST /sms/subscribers` (`{name, phone, ward}`), `DELETE /sms/subscribers/{id}`; `POST /sms/send` (`{message, ward?, phone?}`: broadcast to a ward, to every ward (KMC), or a test to one number) |
 | Health | `GET /health` (also reports the model service status) |
 
 Ward staff can only read and change their own ward; KMC staff can access every ward. Changes made in one portal show up in the other (for example a delayed route in a ward notifies KMC, and a KMC schedule change posts an update to the ward).
