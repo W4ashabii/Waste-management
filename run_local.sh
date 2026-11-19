@@ -31,20 +31,25 @@ trap cleanup EXIT INT TERM
 
 (cd "$ROOT/model-service" && YOLO_AUTOINSTALL=false .venv/bin/python -m uvicorn app.main:app --port 8001) &
 pids+=($!)
-(cd "$ROOT/backend" && MODEL_SERVICE_URL=http://localhost:8001 .venv/bin/python -m uvicorn app.main:app --port 8000) &
+(cd "$ROOT/backend" && MODEL_SERVICE_URL=http://localhost:8001 .venv/bin/python -m uvicorn app.main:app --port 8000 --timeout-keep-alive 75) &
 pids+=($!)
-(cd "$WEB" && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev) &
+# The site forwards /api/v1 to the backend, so phones on the same Wi-Fi need only the site's address.
+(cd "$WEB" && NEXT_PUBLIC_API_URL= BACKEND_URL=http://localhost:8000 npm run dev) &
 pids+=($!)
 
 cat <<MSG
 
-  Frontend:       http://localhost:3000   (KMC: /kmc, Ward: /ward)
+  Frontend:       http://localhost:3000   (one login page for Citizen, Driver, Ward and KMC)
+                  Phones on the same Wi-Fi: http://<this computer's IP>:3000
+                  (camera and GPS on a phone need https: use npm run dev:mobile in the website instead)
   Backend API:    http://localhost:8000/docs
   Model service:  http://localhost:8001/health
 
   Demo logins (password demo1234):
-    KMC portal   anita.shrestha@kathmandu.gov.np
+    Citizen      asha.gurung@example.com
+    Driver       ram.thapa@kathmandu.gov.np
     Ward portal  ward17@kathmandu.gov.np
+    KMC portal   anita.shrestha@kathmandu.gov.np
 
   Ctrl+C stops everything.
 MSG

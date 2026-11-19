@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import async_session, init_db
 from app import sms as sms_service
-from app.routers import auth, identify, kmc, shared, sms, ward
+from app.routers import auth, citizen, driver, identify, kmc, live, shared, sms, ward
 from app.seed import seed
 
 
@@ -39,7 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for module in (auth, ward, kmc, shared, identify, sms):
+for module in (auth, ward, kmc, shared, identify, sms, live, citizen, driver):
     app.include_router(module.router)
 
 

@@ -12,7 +12,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_password_hash
-from app.models import Driver, Notification, Portal, Program, Report, Route, Subscriber, Update, User, Vehicle, Ward
+from app.geo import DEMO_ROUTES, generated_stops
+from app.models import Driver, Notification, Portal, Program, Report, Route, Stop, Subscriber, Update, User, Vehicle, Ward
 from app.services import KMC_SCOPE, ward_scope
 
 DATA = Path(__file__).parent / "seed_data"
@@ -37,6 +38,7 @@ async def seed(db: AsyncSession) -> bool:
     """Insert demo data if the database is empty. Returns True if it seeded."""
     if (await db.execute(select(func.count()).select_from(Ward))).scalar_one():
         await seed_subscribers(db)  # databases seeded before SMS alerts existed
+        await seed_field_data(db)  # ... and before the citizen and driver sections
         return False
 
     meta = load("meta")
@@ -144,6 +146,7 @@ async def seed(db: AsyncSession) -> bool:
 
     await db.commit()
     await seed_subscribers(db)
+    await seed_field_data(db)
     return True
 
 
@@ -152,4 +155,68 @@ async def seed_subscribers(db: AsyncSession) -> None:
     if (await db.execute(select(func.count()).select_from(Subscriber))).scalar_one():
         return
     db.add_all(Subscriber(name=s["name"], phone=s["phone"], ward=s["ward"]) for s in load("sms_subscribers"))
+    await db.commit()
+
+
+DEMO_CITIZEN = {"name": "Asha Gurung", "email": "asha.gurung@example.com", "phone": "+9779800000099"}
+
+
+def driver_email(name: str) -> str:
+    return ".".join(name.lower().split()) + "@kathmandu.gov.np"
+
+
+async def seed_field_data(db: AsyncSession) -> None:
+    """Stops with coordinates, driver accounts, a demo citizen and starting truck positions.
+    Each part is skipped when it already exists, so this also upgrades older databases."""
+    meta = load("meta")
+    demo_ward = load("ward_user")["ward"]
+    password_hash = None
+
+    def demo_hash() -> str:
+        nonlocal password_hash
+        password_hash = password_hash or get_password_hash(meta["demoPassword"])
+        return password_hash
+
+    # Stops for every route that has a vehicle and none yet.
+    routes = list((await db.execute(select(Route).where(Route.vehicle != "").order_by(Route.ward, Route.n))).scalars())
+    has_stops = set((await db.execute(select(Stop.route_id).distinct())).scalars())
+    for route in routes:
+        demo = DEMO_ROUTES.get(route.n) if route.ward == demo_ward else None
+        if route.waste_type is None or (demo and route.waste_type == "Organic + Inorganic"):
+            route.waste_type = demo["waste"] if demo else "Organic + Inorganic"
+        if route.id in has_stops:
+            continue
+        points = demo["stops"] if demo else generated_stops(route.ward, route.n)
+        done = len(points) if route.status == "Completed" else (len(points) * 3 // 7 if route.status == "In Progress" else 0)
+        for i, (name, lat, lng) in enumerate(points):
+            collected = i < done
+            db.add(Stop(
+                route_id=route.id, seq=i + 1, name=name, lat=lat, lng=lng, status="Collected" if collected else "Pending",
+                collected_at=datetime.utcnow() if collected else None,
+            ))
+        # Park the truck at its next stop (or the last one) so the maps have something to show.
+        vehicle = await db.get(Vehicle, route.vehicle)
+        if vehicle is not None and vehicle.lat is None and route.status != "Upcoming":
+            name, lat, lng = points[min(done, len(points) - 1)]
+            vehicle.lat, vehicle.lng, vehicle.accuracy, vehicle.located_at = lat, lng, 25.0, datetime.utcnow()
+
+    # A driver account for every driver (email first.last@kathmandu.gov.np).
+    emails = set((await db.execute(select(User.email))).scalars())
+    for name in (await db.execute(select(Driver.name).order_by(Driver.id))).scalars():
+        email = driver_email(name)
+        if email not in emails:
+            db.add(User(name=name, role="Driver", email=email, password_hash=demo_hash(), portal=Portal.DRIVER))
+            emails.add(email)
+
+    if DEMO_CITIZEN["email"] not in emails:
+        db.add(User(
+            name=DEMO_CITIZEN["name"], role="Resident", email=DEMO_CITIZEN["email"], password_hash=demo_hash(),
+            portal=Portal.CITIZEN, ward=demo_ward, phone=DEMO_CITIZEN["phone"],
+        ))
+
+    # Reports from before report history existed.
+    for report in (await db.execute(select(Report).where(Report.history.is_(None)))).scalars():
+        report.history = [{"status": "Pending", "at": None, "note": f"Reported {report.date}"}]
+        if report.status != "Pending":
+            report.history.append({"status": report.status, "at": None, "note": None})
     await db.commit()

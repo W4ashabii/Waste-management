@@ -46,6 +46,8 @@ async def identify(
         ward = ward if ward is not None else user.ward
         if ward is not None:
             require_ward_access(user, ward)
+    elif user is not None and user.portal in (Portal.CITIZEN, Portal.DRIVER):
+        ward = user.ward  # citizens' photos count for their own ward
     if ward is not None and await db.get(Ward, ward) is None:
         raise HTTPException(status_code=404, detail=f"Ward {ward} not found")
 
@@ -56,7 +58,9 @@ async def identify(
         raise HTTPException(status_code=413, detail="Image is too large")
 
     result = await classify(data, image.filename or "upload", image.content_type or "application/octet-stream")
-    log.info(
+    # Live scans send about three frames a second; only saved photos are logged at INFO.
+    log.log(
+        logging.INFO if save else logging.DEBUG,
         "%s %s -> %s (%.0f%%) in %sms, %d KB, ward=%s, user=%s", "Saved" if save else "Live frame", image.filename,
         result["label"], result["confidence"] * 100, result.get("inference_ms"), len(data) // 1024, ward,
         user.email if user else "anonymous",
@@ -89,7 +93,10 @@ async def list_identifications(
         if ward is None:
             raise HTTPException(status_code=400, detail="Select a ward first")
         require_ward_access(user, ward)
-    where = [Identification.ward == ward] if ward is not None else []
+    if user.portal in (Portal.CITIZEN, Portal.DRIVER):
+        where = [Identification.user_id == user.id]  # citizens and drivers see only their own
+    else:
+        where = [Identification.ward == ward] if ward is not None else []
 
     items = (await db.execute(select(Identification).where(*where).order_by(Identification.id.desc()).limit(limit))).scalars()
     counts = dict((await db.execute(

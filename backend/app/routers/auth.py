@@ -5,12 +5,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import create_access_token, get_current_user, get_password_hash, verify_password
 from app.database import get_db
-from app.models import Portal, User, Ward
+from app import sms
+from app.models import Driver, Portal, User, Ward
 from app.serializers import user_out
 
 router = APIRouter(prefix="/api/v1", tags=["auth"])
-PORTALS = f"^({Portal.KMC}|{Portal.WARD})$"
-PORTAL_NAMES = {Portal.KMC: "KMC staff portal", Portal.WARD: "ward staff portal"}
+PORTALS = f"^({Portal.KMC}|{Portal.WARD}|{Portal.CITIZEN}|{Portal.DRIVER})$"
+PORTAL_NAMES = {
+    Portal.KMC: "KMC staff portal", Portal.WARD: "ward staff portal", Portal.CITIZEN: "citizen section", Portal.DRIVER: "driver section",
+}
+FALLBACK_ROLES = {Portal.KMC: "KMC Staff", Portal.WARD: "Ward Staff", Portal.CITIZEN: "Resident", Portal.DRIVER: "Driver"}
 
 
 class LoginRequest(BaseModel):
@@ -22,6 +26,9 @@ class LoginRequest(BaseModel):
 class SignupRequest(LoginRequest):
     name: str = Field(min_length=1)
     role: str = ""
+    # Citizens choose their ward when they sign up; ward staff choose it after login.
+    ward: int | None = None
+    phone: str | None = None
 
 
 class ProfileUpdate(BaseModel):
@@ -29,6 +36,7 @@ class ProfileUpdate(BaseModel):
     role: str | None = None
     email: str | None = Field(default=None, min_length=3)
     ward: int | None = None
+    phone: str | None = None
 
 
 class PasswordChange(BaseModel):
@@ -59,12 +67,24 @@ async def signup(body: SignupRequest, db: AsyncSession = Depends(get_db)):
     email = body.email.strip().lower()
     if await email_taken(db, email):
         raise HTTPException(status_code=400, detail="Email already registered")
-    fallback_role = "KMC Staff" if body.portal == Portal.KMC else "Ward Staff"
+    if len(body.password) < 6:
+        raise HTTPException(status_code=422, detail="Password must be at least 6 characters")
+    ward = None
+    if body.portal == Portal.CITIZEN:
+        if body.ward is None:
+            raise HTTPException(status_code=422, detail="Choose your ward")
+        if await db.get(Ward, body.ward) is None:
+            raise HTTPException(status_code=404, detail=f"Ward {body.ward} not found")
+        ward = body.ward
+    phone = phone_or_422(body.phone) if body.phone else None
+    name = body.name.strip()
     user = User(
-        name=body.name.strip(), role=body.role.strip() or fallback_role, email=email,
-        password_hash=get_password_hash(body.password), portal=body.portal,
+        name=name, role=body.role.strip() or FALLBACK_ROLES[body.portal], email=email,
+        password_hash=get_password_hash(body.password), portal=body.portal, ward=ward, phone=phone,
     )
     db.add(user)
+    if body.portal == Portal.DRIVER and (await db.execute(select(Driver.id).where(Driver.name == name))).first() is None:
+        db.add(Driver(name=name))  # so ward staff can assign the new driver to a vehicle
     await db.commit()
     await db.refresh(user)
     return token_response(user)
@@ -78,6 +98,9 @@ async def me(user: User = Depends(get_current_user)):
 @router.patch("/me")
 async def update_me(body: ProfileUpdate, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if body.name is not None:
+        if user.portal == Portal.DRIVER and body.name.strip() != user.name:
+            # Vehicles are assigned to drivers by name.
+            raise HTTPException(status_code=400, detail="Ask your ward office to change a driver's name")
         user.name = body.name.strip()
     if body.role is not None:
         user.role = body.role.strip()
@@ -87,14 +110,23 @@ async def update_me(body: ProfileUpdate, user: User = Depends(get_current_user),
             raise HTTPException(status_code=400, detail="Email already registered")
         user.email = email
     if body.ward is not None:
-        # Ward staff pick the ward they manage after logging in.
-        if user.portal != Portal.WARD:
-            raise HTTPException(status_code=400, detail="Only ward staff have a ward")
+        # Ward staff pick the ward they manage after logging in; citizens can move ward.
+        if user.portal not in (Portal.WARD, Portal.CITIZEN):
+            raise HTTPException(status_code=400, detail="Only ward staff and citizens have a ward")
         if await db.get(Ward, body.ward) is None:
             raise HTTPException(status_code=404, detail=f"Ward {body.ward} not found")
         user.ward = body.ward
+    if body.phone is not None:
+        user.phone = phone_or_422(body.phone) if body.phone.strip() else None
     await db.commit()
     return user_out(user)
+
+
+def phone_or_422(value: str) -> str:
+    try:
+        return sms.normalize_phone(value)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
 @router.post("/me/password", status_code=status.HTTP_204_NO_CONTENT)

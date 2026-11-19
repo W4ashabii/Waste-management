@@ -71,3 +71,24 @@ def fake_classifier(monkeypatch):
 
     monkeypatch.setattr("app.routers.identify.classify", fake)
     return calls
+
+
+CITIZEN_EMAIL = "asha.gurung@example.com"
+DRIVER_EMAIL = "ram.thapa@kathmandu.gov.np"
+
+
+@pytest.fixture
+async def citizen():
+    async with make_client() as c:
+        yield await login(c, CITIZEN_EMAIL, "citizen")
+
+
+@pytest.fixture
+async def driver():
+    async with make_client() as c:
+        yield await login(c, DRIVER_EMAIL, "driver")
+
+
+@pytest.fixture(autouse=True)
+def upload_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.config.settings.UPLOAD_DIR", str(tmp_path / "uploads"))

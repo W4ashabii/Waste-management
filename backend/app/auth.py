@@ -56,8 +56,28 @@ async def get_kmc_user(user: User = Depends(get_current_user)) -> User:
     return user
 
 
+async def get_staff_user(user: User = Depends(get_current_user)) -> User:
+    """KMC or ward staff. Citizens and drivers have their own routers."""
+    if user.portal not in (Portal.KMC, Portal.WARD):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff only")
+    return user
+
+
+async def get_citizen_user(user: User = Depends(get_current_user)) -> User:
+    if user.portal != Portal.CITIZEN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Citizen accounts only")
+    return user
+
+
+async def get_driver_user(user: User = Depends(get_current_user)) -> User:
+    if user.portal != Portal.DRIVER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Driver accounts only")
+    return user
+
+
 def can_access_ward(user: User, ward: int) -> bool:
-    return user.portal == Portal.KMC or user.ward == ward
+    """Staff access to a ward's records: KMC staff see every ward, ward staff their own."""
+    return user.portal == Portal.KMC or (user.portal == Portal.WARD and user.ward == ward)
 
 
 def require_ward_access(user: User, ward: int) -> None:

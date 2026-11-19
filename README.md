@@ -1,6 +1,6 @@
 # Kathmandu Waste Management — API and waste classifier
 
-Backend for the Next.js app in [`../waste-management-website`](../waste-management-website) (KMC and ward staff portals).
+Backend for the Next.js app in [`../waste-management-website`](../waste-management-website): one site with Citizen, Driver, Ward staff and KMC staff sections.
 
 | Part | Path | Port |
 | --- | --- | --- |
@@ -18,10 +18,14 @@ Needs [uv](https://docs.astral.sh/uv/) and Node.js. It creates the virtualenvs, 
 
 Demo logins (password `demo1234`):
 
-| Portal | Email |
+| Section | Email |
 | --- | --- |
-| KMC | anita.shrestha@kathmandu.gov.np |
+| Citizen | asha.gurung@example.com (Ward 17) |
+| Driver | ram.thapa@kathmandu.gov.np, or first.last@kathmandu.gov.np for any driver |
 | Ward | ward17@kathmandu.gov.np (Ward 17 has the detailed demo data) |
+| KMC | anita.shrestha@kathmandu.gov.np |
+
+Older databases are upgraded on startup: missing columns are added (`app/database.py`) and stops, driver and citizen accounts and starting truck positions are seeded if absent.
 
 Or with Docker (Postgres, weights baked into the model image): `docker compose up --build`.
 
@@ -59,15 +63,18 @@ Interactive docs: http://localhost:8000/docs. All routes are under `/api/v1` and
 
 | Area | Endpoints |
 | --- | --- |
-| Auth | `POST /auth/login`, `POST /auth/signup` (`{email, password, portal: "kmc"\|"ward"}`), `GET/PATCH /me` (ward staff set their ward here), `POST /me/password` |
+| Auth | `POST /auth/login`, `POST /auth/signup` (`{email, password, portal: "kmc"\|"ward"\|"citizen"\|"driver"}`; citizens also send `ward` and optionally `phone`), `GET/PATCH /me` (ward staff and citizens set their ward here), `POST /me/password` |
 | Ward portal | `GET /wards/{n}/state`; `POST /wards/{n}/routes/{r}/start`, `/driver-update`; `PATCH /wards/{n}/routes/{r}` (vehicle, time); `POST /wards/{n}/vehicles`, `/programs`, `/updates`, `/reports` |
 | KMC portal | `GET /kmc/state`; `POST /kmc/wards/{n}/complete`, `/restart`; `PUT /kmc/wards/{n}/assignment`, `/schedule`; `POST /kmc/vehicles`, `/programs`, `/updates` |
 | Shared | `PATCH /vehicles/{id}`; `POST /programs/{id}/decision`, `/resubmit`, `/start`, `/complete`, `/register`; `PATCH /reports/{id}` |
 | Identify | `POST /identify` (multipart `image`, optional `ward`, `save=false` for live-video frames that should not be stored; login optional) → `{label, category, confidence, probabilities}`; `GET /identifications?ward=` → recent items + counts |
 | SMS | `GET /sms?ward=` (subscribers, outbox, counts, provider); `POST /sms/subscribers` (`{name, phone, ward}`), `DELETE /sms/subscribers/{id}`; `POST /sms/send` (`{message, ward?, phone?}`: broadcast to a ward, to every ward (KMC), or a test to one number) |
+| Live map | `GET /live?ward=` → routes with stops (`lat`, `lng`, `status`), vehicles with their last GPS fix. Citizens get their own ward; ward staff theirs; KMC any or all. `GET /uploads/{name}`: report photos |
+| Citizen | `GET /citizen/state`; `POST /citizen/reports` (multipart: `type`, `category`, `description`, `location`, `route`, optional `photo`); `POST/DELETE /citizen/programs/{id}/register`; `PUT /citizen/reminder` (`{enabled, phone?}`, subscribes the phone to the ward's SMS alerts) |
+| Driver | `GET /driver/state` (routes of the vehicles whose driver is this account's name); `POST /driver/routes/{id}/start`, `/finish` (`{outcome, kg}`); `POST /driver/stops/{id}` (`{status: Pending\|Collected\|Skipped}`); `POST /driver/location` (`{lat, lng, accuracy?, heading?, speed?, vehicle?}`); `POST /driver/issues` |
 | Health | `GET /health` (also reports the model service status) |
 
-Ward staff can only read and change their own ward; KMC staff can access every ward. Changes made in one portal show up in the other (for example a delayed route in a ward notifies KMC, and a KMC schedule change posts an update to the ward).
+Ward staff can only read and change their own ward; KMC staff can access every ward. Citizens and drivers cannot use the staff endpoints (ward, KMC, shared, SMS); citizens see only their own reports and identifications. Report status changes are kept in each report's `history` and notify the citizen who filed it. Changes made in one portal show up in the other (for example a delayed route in a ward notifies KMC, and a KMC schedule change posts an update to the ward).
 
 Model service: `POST /classify` (multipart `image`, JPEG/PNG/WebP/HEIC, max 10 MB) and `GET /health`.
 

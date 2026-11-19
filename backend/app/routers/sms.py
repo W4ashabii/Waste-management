@@ -7,13 +7,13 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import sms
-from app.auth import get_current_user, require_ward_access
+from app.auth import get_current_user, get_staff_user, require_ward_access
 from app.database import get_db
 from app.models import Portal, SmsMessage, Subscriber, User
 from app.serializers import sms_out, subscriber_out
 from app.services import get_ward
 
-router = APIRouter(prefix="/api/v1/sms", tags=["sms"])
+router = APIRouter(prefix="/api/v1/sms", tags=["sms"], dependencies=[Depends(get_staff_user)])
 log = logging.getLogger("app.sms")
 
 
