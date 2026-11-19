@@ -47,7 +47,9 @@ services:
     build:
       context: ../waste-management-website
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        # Empty: the browser calls the site's /api/v1 and the site forwards it to BACKEND_URL.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+        BACKEND_URL: http://backend:8000
     ports:
       - "3000:3000"
     depends_on:

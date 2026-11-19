@@ -1,0 +1,184 @@
+INFO:     Started server process [433210]
+INFO:     Waiting for application startup.
+2026-10-28 13:12:19,897 INFO app.sms: SMS provider: dummy (messages are logged, not delivered)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-10-28 13:12:21,446 INFO httpx: HTTP Request: GET http://localhost:8001/health "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:60284 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60292 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60308 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60324 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60324 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60324 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60324 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60316 - "OPTIONS /api/v1/identify HTTP/1.1" 200 OK
+2026-10-28 13:12:25,130 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:25,130 INFO app.identify: Saved camera-1793172445098.jpg -> Bio (100%) in 16ms, 58 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:60324 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:60324 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55804 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55804 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55804 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55804 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55810 - "OPTIONS /api/v1/identify HTTP/1.1" 200 OK
+2026-10-28 13:12:28,157 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:28,158 INFO app.identify: Saved camera-1793172448131.jpg -> Bio (100%) in 11ms, 58 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55804 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:55804 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55814 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55814 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55814 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55814 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "OPTIONS /api/v1/identify HTTP/1.1" 200 OK
+2026-10-28 13:12:30,042 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:30,043 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 12ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55814 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:30,739 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:30,739 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 20ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55814 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:31,429 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:31,430 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 13ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55814 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:32,145 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:32,146 INFO app.identify: Saved live-1793172452116.jpg -> Non_Bio (100%) in 17ms, 58 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55814 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:55814 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+2026-10-28 13:12:32,157 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:32,158 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 9ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55816 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:32,839 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:32,840 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 11ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55816 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:55826 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55826 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55826 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55826 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55842 - "OPTIONS /api/v1/identify HTTP/1.1" 200 OK
+2026-10-28 13:12:33,543 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:33,544 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 14ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55826 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:34,227 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:34,227 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 13ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55826 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:34,929 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:34,929 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 14ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55826 - "POST /api/v1/identify HTTP/1.1" 201 Created
+2026-10-28 13:12:35,633 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:35,634 INFO app.identify: Live frame live-frame.jpg -> Non_Bio (100%) in 16ms, 36 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:55826 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:37822 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37822 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37822 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37822 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "OPTIONS /api/v1/identify HTTP/1.1" 200 OK
+2026-10-28 13:12:36,727 INFO httpx: HTTP Request: POST http://localhost:8001/classify "HTTP/1.1 200 OK"
+2026-10-28 13:12:36,727 INFO app.identify: Saved crushed-cans.jpg -> Non_Bio (91%) in 13ms, 379 KB, ward=17, user=ward17@kathmandu.gov.np
+INFO:     127.0.0.1:37822 - "POST /api/v1/identify HTTP/1.1" 201 Created
+INFO:     127.0.0.1:37822 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37842 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37842 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37848 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37848 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37842 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37848 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37848 - "OPTIONS /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37842 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37848 - "GET /api/v1/identifications?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "OPTIONS /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "OPTIONS /api/v1/sms/send HTTP/1.1" 200 OK
+2026-10-28 13:12:39,921 INFO app.sms: [dummy] SMS to +9779800000001 (97 chars, 1 part(s)) ref=dummy-5bb0f98f70: KMC Waste: Collection in Ward 17 is delayed today. We will text you when the truck is on its way.
+2026-10-28 13:12:39,921 INFO app.sms: [dummy] SMS to +9779800000002 (97 chars, 1 part(s)) ref=dummy-7d4e4fff12: KMC Waste: Collection in Ward 17 is delayed today. We will text you when the truck is on its way.
+2026-10-28 13:12:39,922 INFO app.sms: [dummy] SMS to +9779800000003 (97 chars, 1 part(s)) ref=dummy-3e507e0c12: KMC Waste: Collection in Ward 17 is delayed today. We will text you when the truck is on its way.
+2026-10-28 13:12:39,922 INFO app.sms: [dummy] SMS to +9779800000004 (97 chars, 1 part(s)) ref=dummy-da7ec043a5: KMC Waste: Collection in Ward 17 is delayed today. We will text you when the truck is on its way.
+2026-10-28 13:12:39,922 INFO app.sms: [dummy] SMS to +9779800000005 (97 chars, 1 part(s)) ref=dummy-3827d5bb57: KMC Waste: Collection in Ward 17 is delayed today. We will text you when the truck is on its way.
+2026-10-28 13:12:39,925 INFO app.sms: ward17@kathmandu.gov.np sent a manual SMS to Ward 17: 5 sent, 0 failed
+INFO:     127.0.0.1:37878 - "POST /api/v1/sms/send HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "OPTIONS /api/v1/sms/subscribers HTTP/1.1" 200 OK
+2026-10-28 13:12:40,807 INFO app.sms: Subscriber +9779841234567 added to Ward 17 by ward17@kathmandu.gov.np
+INFO:     127.0.0.1:37864 - "POST /api/v1/sms/subscribers HTTP/1.1" 201 Created
+INFO:     127.0.0.1:37864 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+2026-10-28 13:12:41,350 INFO app.sms: [dummy] SMS to +9779841234567 (30 chars, 1 part(s)) ref=dummy-a977b2529e: Test message from the SMS page
+2026-10-28 13:12:41,351 INFO app.sms: ward17@kathmandu.gov.np sent a test SMS to Ward 17: 1 sent, 0 failed
+INFO:     127.0.0.1:37864 - "POST /api/v1/sms/send HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+2026-10-28 13:12:41,392 INFO app.sms: [dummy] SMS to +9779800000001 (117 chars, 1 part(s)) ref=dummy-8d734ae63d: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,392 INFO app.sms: [dummy] SMS to +9779800000002 (117 chars, 1 part(s)) ref=dummy-a727786aa2: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,392 INFO app.sms: [dummy] SMS to +9779800000003 (117 chars, 1 part(s)) ref=dummy-38fc07b484: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,393 INFO app.sms: [dummy] SMS to +9779800000004 (117 chars, 1 part(s)) ref=dummy-14642828f9: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,393 INFO app.sms: [dummy] SMS to +9779800000005 (117 chars, 1 part(s)) ref=dummy-6325113c2d: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,393 INFO app.sms: [dummy] SMS to +9779841234567 (117 chars, 1 part(s)) ref=dummy-77038e2780: KMC Waste: Collection on Route 2 (Tinkune) is delayed today by a vehicle problem. We will update you when it resumes.
+2026-10-28 13:12:41,393 INFO app.sms: Ward 17 delay alert sent to 6 subscriber(s)
+INFO:     127.0.0.1:37898 - "POST /api/v1/wards/17/routes/2/driver-update HTTP/1.1" 200 OK
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779800000001 (83 chars, 1 part(s)) ref=dummy-eda4c51e2b: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779800000002 (83 chars, 1 part(s)) ref=dummy-72a8001b89: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779800000003 (83 chars, 1 part(s)) ref=dummy-81faa70a53: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779800000004 (83 chars, 1 part(s)) ref=dummy-70a2037db5: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779800000005 (83 chars, 1 part(s)) ref=dummy-71fa4e66bf: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,399 INFO app.sms: [dummy] SMS to +9779841234567 (83 chars, 1 part(s)) ref=dummy-9c28e8e7a1: KMC Waste: Collection time for Route 3 (Baneshwor) changes from 8:00 AM to 7:30 AM.
+2026-10-28 13:12:41,400 INFO app.sms: Ward 17 schedule alert sent to 6 subscriber(s)
+INFO:     127.0.0.1:37900 - "PATCH /api/v1/wards/17/routes/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37878 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37864 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "OPTIONS /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37914 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "GET /api/v1/wards/17/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "OPTIONS /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37914 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37912 - "GET /api/v1/sms?ward=17 HTTP/1.1" 200 OK
+2026-10-28 13:12:43,762 INFO app.sms: [dummy] SMS to +9779800000011 (79 chars, 1 part(s)) ref=dummy-3f74d9fea7: KMC Waste: Waste collection in Ward 12 moves from 6:30 AM to 9:30 AM (Organic).
+2026-10-28 13:12:43,762 INFO app.sms: [dummy] SMS to +9779800000012 (79 chars, 1 part(s)) ref=dummy-6c8a87e9a0: KMC Waste: Waste collection in Ward 12 moves from 6:30 AM to 9:30 AM (Organic).
+2026-10-28 13:12:43,763 INFO app.sms: Ward 12 schedule alert sent to 2 subscriber(s)
+INFO:     127.0.0.1:37918 - "PUT /api/v1/kmc/wards/12/schedule HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "OPTIONS /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37930 - "GET /api/v1/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37930 - "OPTIONS /api/v1/kmc/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "OPTIONS /api/v1/kmc/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37930 - "GET /api/v1/kmc/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "GET /api/v1/kmc/state HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "OPTIONS /api/v1/sms HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37930 - "GET /api/v1/sms HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37928 - "GET /api/v1/sms HTTP/1.1" 200 OK

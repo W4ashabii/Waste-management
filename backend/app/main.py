@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 import httpx
@@ -6,12 +7,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import async_session, init_db
-from app.routers import auth, identify, kmc, shared, ward
+from app import sms as sms_service
+from app.routers import auth, citizen, driver, identify, kmc, live, shared, sms, ward
 from app.seed import seed
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    provider = sms_service.provider()
+    logging.getLogger("app.sms").info(
+        "SMS provider: %s%s", provider.name, " (messages are logged, not delivered)" if provider.name == "dummy" else "",
+    )
     await init_db()
     if settings.SEED_ON_STARTUP:
         async with async_session() as db:
@@ -30,7 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for module in (auth, ward, kmc, shared, identify):
+for module in (auth, ward, kmc, shared, identify, sms, live, citizen, driver):
     app.include_router(module.router)
 
 

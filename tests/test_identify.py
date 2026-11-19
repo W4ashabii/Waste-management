@@ -42,3 +42,9 @@ async def test_model_service_down(client, monkeypatch):
     monkeypatch.setattr("app.routers.identify.settings.MODEL_SERVICE_URL", "http://127.0.0.1:9")
     r = await client.post("/api/v1/identify", files=image())
     assert r.status_code == 503
+
+
+async def test_live_frame_is_not_saved(ward, fake_classifier):
+    r = await ward.post("/api/v1/identify", files=image(), data={"save": "false"})
+    assert r.status_code == 201 and r.json()["id"] is None and r.json()["label"] == "Bio"
+    assert (await ward.get("/api/v1/identifications")).json()["summary"]["total"] == 0

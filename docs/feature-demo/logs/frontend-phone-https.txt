@@ -1,0 +1,10 @@
+Open https://192.168.16.126:3000 on your phone (same Wi-Fi) and accept the certificate warning.
+⚠ Self-signed certificates are currently an experimental feature, use with caution.
+▲ Next.js 16.3.8 (Turbopack)
+- Local:         https://localhost:3000
+- Network:       https://0.0.0.0:3000
+✓ Ready in 260ms
+✓ Running next.config.mjs took 13ms
+
+ GET /ward/identify 200 in 226ms (next.js: 92ms, application-code: 134ms)
+[?25h

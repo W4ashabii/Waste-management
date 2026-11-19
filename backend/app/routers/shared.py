@@ -3,14 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import get_current_user, require_ward_access
+from app.auth import get_current_user, get_staff_user, require_ward_access
 from app.database import get_db
 from app.models import Portal, Program, Report, User, Vehicle
 from app.routers.ward import announce_program
 from app.serializers import kmc_program, kmc_report, vehicle_out
-from app.services import KMC_SCOPE, notify, ward_scope
+from app.services import KMC_SCOPE, add_history, notify, report_ref, user_scope, ward_scope
 
-router = APIRouter(prefix="/api/v1", tags=["shared"])
+router = APIRouter(prefix="/api/v1", tags=["shared"], dependencies=[Depends(get_staff_user)])
 
 
 class VehiclePatch(BaseModel):
@@ -70,7 +70,7 @@ async def decide_program(program_id: int, body: Decision, user: User = Depends(g
     program.approval = "Approved" if body.approve else "Needs changes"
     if body.approve:
         program.status = "Upcoming"
-        announce_program(db, program)
+        await announce_program(db, program)
     notify(db, ward_scope(program.ward), f"KMC {'approved' if body.approve else 'requested changes to'} \"{program.name}\"", "/ward/awareness")
     await db.commit()
     return kmc_program(program)
@@ -116,9 +116,14 @@ async def patch_report(report_id: int, body: ReportPatch, user: User = Depends(g
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
     require_ward_access(user, report.ward)
+    changed = body.status is not None and body.status != report.status
     if body.status is not None:
         report.status = body.status
     if body.note:
         report.notes = [*(report.notes or []), body.note]
+    if changed or body.note:
+        add_history(report, report.status, body.note)
+    if report.user_id and changed:
+        notify(db, user_scope(report.user_id), f"Your report {report_ref(report.id)} is now {report.status}", f"/citizen/reports?id={report.id}")
     await db.commit()
     return kmc_report(report)

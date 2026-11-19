@@ -17,7 +17,17 @@ class Settings(BaseSettings):
     # Seed the demo data from app/seed_data when the database is empty.
     SEED_ON_STARTUP: bool = True
     MAX_IMAGE_BYTES: int = 10 * 1024 * 1024
+    # Photos attached to citizen reports.
+    UPLOAD_DIR: str = "./uploads"
+    # A vehicle counts as "live" on the map if its driver app sent a GPS fix this recently.
+    LIVE_LOCATION_SECONDS: int = 120
     SQL_ECHO: bool = False
+    # SMS alerts to residents (app/sms.py). "dummy" logs messages and records them
+    # as sent without contacting anyone; "sparrow" sends through Sparrow SMS.
+    SMS_PROVIDER: str = "dummy"
+    SMS_SENDER: str = "KMC-Waste"
+    SPARROW_SMS_TOKEN: str = ""
+    SPARROW_SMS_URL: str = "https://api.sparrowsms.com/v2/sms/"
 
     @property
     def cors_origins(self) -> list[str]:

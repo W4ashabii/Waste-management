@@ -6,17 +6,17 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import get_current_user, require_ward_access
+from app import sms
+from app.auth import get_current_user, get_staff_user, require_ward_access
 from app.database import get_db
 from app.models import Driver, Notification, Program, Report, Update, User, Vehicle
 from app.serializers import (
     notification_out, today_short, update_out, vehicle_out, ward_program, ward_report, ward_route, ward_stat,
 )
-from app.services import (
-    KMC_SCOPE, format_time, get_route, get_ward, notify, refresh_ward_status, ward_routes, ward_scope,
-)
+from app import services
+from app.services import KMC_SCOPE, add_history, format_time, get_route, get_ward, notify, ward_routes, ward_scope
 
-router = APIRouter(prefix="/api/v1/wards/{ward_n}", tags=["ward"])
+router = APIRouter(prefix="/api/v1/wards/{ward_n}", tags=["ward"], dependencies=[Depends(get_staff_user)])
 
 
 async def ward_access(ward_n: int, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> int:
@@ -101,8 +101,7 @@ async def get_state(ward_n: int = Depends(ward_access), db: AsyncSession = Depen
 @router.post("/routes/{route_n}/start")
 async def start_route(route_n: int, ward_n: int = Depends(ward_access), db: AsyncSession = Depends(get_db)):
     route = await get_route(db, ward_n, route_n)
-    route.status = "In Progress"
-    await refresh_ward_status(db, await get_ward(db, ward_n))
+    await services.start_route(db, await get_ward(db, ward_n), route)
     await db.commit()
     return ward_route(route)
 
@@ -111,22 +110,7 @@ async def start_route(route_n: int, ward_n: int = Depends(ward_access), db: Asyn
 async def driver_update(route_n: int, body: DriverUpdate, ward_n: int = Depends(ward_access), db: AsyncSession = Depends(get_db)):
     ward = await get_ward(db, ward_n)
     route = await get_route(db, ward_n, route_n)
-    if body.outcome == "completed":
-        ward.tons = max(0.0, ward.tons + (body.kg - route.kg) / 1000)
-        route.status, route.kg = "Completed", body.kg
-    elif body.outcome == "delayed":
-        route.status = "Delayed"
-        db.add(Report(
-            type="Vehicle breakdown", ward=ward_n, source="Driver", date=today_short(), status="Pending", route=route_n,
-            description=f"{route.vehicle} has a problem; Route {route_n} is delayed.", category="Vehicle", location=route.area,
-            notes=[],
-        ))
-        notify(db, ward_scope(ward_n), f"Route {route_n} delayed: driver reported a vehicle problem", "/ward/reports")
-        notify(db, KMC_SCOPE, f"Collection delayed in Ward {ward_n} (Route {route_n})", "/kmc/collection")
-    else:
-        route.status = "Incomplete"
-        notify(db, KMC_SCOPE, f"Route {route_n} incomplete in Ward {ward_n}", "/kmc/collection")
-    await refresh_ward_status(db, ward)
+    await services.apply_driver_update(db, ward, route, body.outcome, body.kg)
     await db.commit()
     return ward_route(route)
 
@@ -146,6 +130,10 @@ async def patch_route(route_n: int, body: RoutePatch, ward_n: int = Depends(ward
         ))
         notify(db, ward_scope(ward_n), f"Collection schedule changed for Route {route_n}", "/ward/updates")
         notify(db, KMC_SCOPE, f"Collection schedule changed in Ward {ward_n}", "/kmc/updates")
+        await sms.alert_ward(
+            db, ward_n, f"Collection time for Route {route_n} ({route.area}) changes from {format_time(old)} "
+            f"to {format_time(body.time)}.", "schedule",
+        )
     await db.commit()
     return ward_route(route)
 
@@ -171,16 +159,18 @@ async def create_program(body: WardProgramIn, ward_n: int = Depends(ward_access)
     if body.needsCoordination:
         notify(db, KMC_SCOPE, f"Ward {ward_n} requests review of \"{body.name}\"", "/kmc/awareness")
     else:
-        announce_program(db, program)
+        await announce_program(db, program)
     await db.commit()
     return ward_program(program)
 
 
-def announce_program(db: AsyncSession, p: Program) -> None:
+async def announce_program(db: AsyncSession, p: Program) -> None:
     db.add(Update(
         category="Awareness", title=f"{p.name} in Ward {p.ward}",
         body=f"{p.date}, {p.time} at {p.location}. Register in the Citizen app.", audience=f"Ward {p.ward}", date=today_short(),
     ))
+    where = f" at {p.location}" if p.location else ""
+    await sms.alert_ward(db, p.ward, f"{p.name} on {p.date}, {p.time}{where}. Everyone is welcome.", "program")
 
 
 @router.post("/updates", status_code=status.HTTP_201_CREATED)
@@ -197,6 +187,7 @@ async def add_report(body: ReportIn, ward_n: int = Depends(ward_access), db: Asy
         type=body.type, ward=ward_n, source=body.source, date=today_short(), status="Pending", route=body.route,
         description=body.description, category=body.category, location=body.location, notes=[],
     )
+    add_history(report, "Pending", f"Logged by ward staff ({body.source})")
     db.add(report)
     notify(db, ward_scope(ward_n), "New citizen complaint received" if body.source == "Citizen" else f"New report: {body.type}", "/ward/reports")
     await db.commit()

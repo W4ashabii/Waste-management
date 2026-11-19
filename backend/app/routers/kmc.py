@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import sms
 from app.auth import get_kmc_user
 from app.database import get_db
 from app.models import Driver, Notification, Program, Report, Route, Update, Vehicle, Ward
@@ -135,6 +136,10 @@ async def change_schedule(ward_n: int, body: ScheduleIn, db: AsyncSession = Depe
         ))
         notify(db, KMC_SCOPE, f"Schedule changed in Ward {ward_n}", "/kmc/updates")
         notify(db, ward_scope(ward_n), "Collection schedule changed by KMC", "/ward/updates")
+        await sms.alert_ward(
+            db, ward_n, f"Waste collection in Ward {ward_n} moves from {format_time(old)} to {format_time(body.time)} "
+            f"({body.kind}).", "schedule",
+        )
     await db.commit()
     return {"t": ward.schedule_time, "k": ward.schedule_kind}
 
@@ -163,6 +168,7 @@ async def add_program(body: KmcProgramIn, db: AsyncSession = Depends(get_db)):
         body=f"Register through the Citizen app. {body.date}, {time}.", audience=f"Ward {body.ward}", date=today_short(),
     ))
     notify(db, ward_scope(body.ward), f"KMC scheduled \"{body.name}\" in your ward", "/ward/awareness")
+    await sms.alert_ward(db, body.ward, f"{body.name} on {body.date}, {time}. Everyone is welcome.", "program")
     await db.commit()
     return kmc_program(program)
 
